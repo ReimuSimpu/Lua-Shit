@@ -2,6 +2,8 @@ local TradingPlaza = 15502339080
 local PS99 = 8737899170
 
 repeat wait() until game:IsLoaded()
+repeat task.wait() until game:GetService("Players").LocalPlayer
+repeat task.wait() until not game.Players.LocalPlayer.PlayerGui:FindFirstChild("__INTRO")
 print("Serverhopping To Plaza")
 wait(10)
 
