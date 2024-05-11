@@ -39,7 +39,7 @@ local function jumpToServer(placeId)
 end
 
 while wait() do
-    if game.PlaceId == PS99 or game.PlaceID == 16498369169 then
+    if game.PlaceId == PS99 or game.PlaceId == 16498369169 then
         jumpToServer(TradingPlaza)
     else
         jumpToServer(PS99)
