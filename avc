@@ -1,0 +1,39 @@
+local Active
+repeat game:GetService("RunService").Heartbeat:Wait()
+    Active = workspace.__THINGS.__INSTANCE_CONTAINER.Active
+until Active ~= nil
+
+local Rooms = {} 
+
+for _, room in ipairs(workspace.__THINGS.__INSTANCE_CONTAINER.Active.Backrooms.GeneratedBackrooms:GetChildren()) do
+    local Reward = room:FindFirstChild("RandomReward")
+    local UID = room:GetAttribute("RoomUID")
+    if Reward and (Reward.Animated.Top.Transparency and Reward.Animated.Bottom.Transparency) ~= 1 then
+        Rooms[UID] = room
+    end
+end
+
+workspace.__THINGS.__INSTANCE_CONTAINER.Active.Backrooms.GeneratedBackrooms.ChildAdded:Connect(function(room)
+    local Reward = room:FindFirstChild("RandomReward")
+    local UID = room:GetAttribute("RoomUID")
+    if Reward and (Reward.Animated.Top.Transparency and Reward.Animated.Bottom.Transparency) ~= 1 then
+        Rooms[UID] = room
+    end
+end)
+while next(Rooms) do
+    for _, room in pairs(Rooms) do
+        local Reward = room:FindFirstChild("RandomReward")
+        local UID = room:GetAttribute("RoomUID")
+        if Reward and (Reward.Animated.Top.Transparency and Reward.Animated.Bottom.Transparency) ~= 1 then
+            repeat task.wait(.3)
+                local Success, Reason = require(game:GetService("ReplicatedStorage").Library).Network.Invoke("Instancing_InvokeCustomFromClient", "Backrooms", "AbstractRoom_InvokeServer", room:GetAttribute("RoomUID"), "ClaimRandomReward", Reward)
+                if Success then
+                    print("Claimed MiniChest")  
+                    Rooms[UID] = nil
+                elseif Reason ~= "You are claiming this too fast!" then
+                    Rooms[UID] = nil
+                end
+            until Success or not Success and Reason ~= "You are claiming this too fast!"
+        end
+    end
+end
