@@ -1,0 +1,11 @@
+script_key="XGJEzkJyfzdFhUuMnJETpVEeAkpCwUPy";
+getgenv().config = {
+    MinBanksRejoin = 3,
+    CollectHallChest = true,
+    SendWebhook = true,
+    WebhookURL = "https://discord.com/api/webhooks/1235746931930824795/67GEkomnU6EU7gYmygyWuXFB_l40W-c1_1NQmjcVkdGoh47uO0Ns6ajgE34IXV5OsT1m",
+}
+
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/62b4e7256faf9cda6aef9557396b862b.lua"))()
+
+-- Discord.gg/qvbJbkCNM6
