@@ -128,7 +128,7 @@ local MailTargets = {
     {Class = "Egg", Names = {"Exclusive"}},
     {Class = "Lootbox", Names = {"Arcade"}},
     {Class = "Ultimate", Names = {"Chest", "Nightmare", "Hidden", "Black"}},
-    {Class = "Misc", Names = {"Key", "Arcade Token"}},
+    {Class = "Misc", Names = {"Arcade Token"}},
 }
 
 
