@@ -126,7 +126,7 @@ local MailTargets = {
     {Class = "Pet", Names = {"Huge", "Titanic"}},
     {Class = "Enchant", Names = {"Chest", "Boss"}},
     {Class = "Egg", Names = {"Exclusive"}},
-    {Class = "Lootbox", Names = {"Arcade"}},
+    {Class = "Lootbox", Names = {"Arcade Egg 5"}},
     {Class = "Ultimate", Names = {"Chest", "Nightmare", "Hidden", "Black"}},
     {Class = "Misc", Names = {"Arcade Token"}},
 }
