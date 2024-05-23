@@ -15,7 +15,7 @@ local function FormatInventory()
     for Class, Inv in pairs(Inventory) do
         for uid, Item in pairs(Inv) do
             local Amount = Item._am or 1
-            if string.find(Item.id, "Huge") or string.find(Item.id, "Titanic") or string.find(Item.id, "Chest Mimic") or string.find(Item.id, "Arcade Egg") then
+            if string.find(Item.id, "Huge") or string.find(Item.id, "Titanic") or string.find(Item.id, "Chest Mimic") or string.find(Item.id, "Arcade Egg") or string.find(Item.id, "Key") or string.find(Item.id, "Token") then
                 inventoryString = inventoryString .. Item.id .. " x" .. Amount .. "\n"
             end
         end
