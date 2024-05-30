@@ -1,12 +1,11 @@
-script_key = "osbTUWEQvumYoKsXqwPyydcQbScWeSdW";
-_G.GWEBHOOK_USERID = "Nigger"
-_G.GWEBHOOK_LINK = "https://discord.com/api/webhooks/1243022518407659601/_RRt2oRclRz8Rw_3GkRk-LJsl0uXHEaRVlDOgeRbI17AHYbNIDykVVMyd7piqFPCuJ7-"
+script_key = "EfDJwbYrYXOCrBTfAYPXTIoDagcwdoWK";
+_G.GWEBHOOK_USERID = "No ping me"
+_G.GWEBHOOK_LINK = "https://discord.com/api/webhooks/1245529371654094868/UPuHAIsetTt8XcjS83TmQedxE8plYLKZ8cGe5DVqDZlbnZGsYBLwAbnR-f9iZh6TFTOS"
 _G.GPROGRESS_MODE = "Hybrid"
-_G.GKICK_AFTER_HOURS = 2
 _G.GGFX_MODE = 1
 _G.GRANK_TO = 99
-_G.GZONE_TO = 143 
-_G.GREBIRTH_TO = 5
+_G.GZONE_TO = 200 
+_G.GREBIRTH_TO = 99
 _G.GMAX_EGG_SLOTS = 25
 _G.GMAX_EQUIP_SLOTS = 40
 _G.GHOLD_GIFTS = false
