@@ -1,4 +1,6 @@
-    local JobIDs = {}
+local HttpService = game:GetService("HttpService")
+
+local JobIDs = {}
     repeat
         task.wait(0.1)
         local API = HttpService:JSONDecode(
