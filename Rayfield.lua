@@ -1,20 +1,8 @@
---[[
-
-Rayfield Interface Suite
-by Sirius
-
-shlex | Designing + Programming
-iRay  | Programming
-
-]]
-
-
-
 local Release = "Beta 8"
 local NotificationDuration = 6.5
 local RayfieldFolder = "Rayfield"
 local ConfigurationFolder = RayfieldFolder.."/Configurations"
-local ConfigurationExtension = ".rfld"
+local ConfigurationExtension = ".json"
 
 
 
@@ -250,13 +238,13 @@ local function LoadConfiguration(Configuration)
 				end    
 			end)
 		else
+
 			RayfieldLibrary:Notify({Title = "Flag Error", Content = "Rayfield was unable to find '"..FlagName.. "'' in the current script"})
 		end
 	end
 end
 
-local function SaveConfiguration()
-	if not CEnabled then return end
+function RayfieldLibrary:SaveConfigurationName(Name)
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
 		if v.Type == "ColorPicker" then
@@ -265,8 +253,28 @@ local function SaveConfiguration()
 			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption or v.Color
 		end
 	end	
-	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    getgenv().SaveDropDown = true
+	writefile(ConfigurationFolder .. "/" .. Name.. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    wait(0.3)
+    getgenv().SaveDropDown = false
 end
+
+
+function RayfieldLibrary:SaveConfiguration()
+	local Data = {}
+	for i,v in pairs(RayfieldLibrary.Flags) do
+		if v.Type == "ColorPicker" then
+			Data[i] = PackColor(v.Color)
+		else
+			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption or v.Color
+		end
+	end	
+    getgenv().SaveDropDown = true
+	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    wait(0.3)
+    getgenv().SaveDropDown = false
+end
+
 
 local neon = (function() -- Open sourced neon module
 	local module = {}
@@ -635,7 +643,7 @@ end
 
 function Hide()
 	Debounce = true
-	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping K", Duration = 7})
+	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping RightShift", Duration = 7})
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 400)}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 45)}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
@@ -873,12 +881,13 @@ end
 function RayfieldLibrary:CreateWindow(Settings)
 	local Passthrough = false
 	Topbar.Title.Text = Settings.Name
-	Main.Size = UDim2.new(0, 450, 0, 260)
+	Main.Size = UDim2.new(0, 300, 0, 260)
 	Main.Visible = true
 	Main.BackgroundTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
 	Topbar.Visible = false
 	Elements.Visible = false
+
 
 	pcall(function()
 		if not Settings.ConfigurationSaving.FileName then
@@ -1287,7 +1296,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.9}):Play()
 					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				else
-					SaveConfiguration()
+					--SaveConfiguration()
 					TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
@@ -1433,7 +1442,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				pcall(function()ColorPickerSettings.Callback(Color3.fromHSV(h,s,v))end)
 				local r,g,b = math.floor((h*255)+0.5),math.floor((s*255)+0.5),math.floor((v*255)+0.5)
 				ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-				SaveConfiguration()
+				--SaveConfiguration()
 			end)
 			--RGB
 			local function rgbBoxes(box,toChange)
@@ -1452,7 +1461,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				end
 				local r,g,b = math.floor((h*255)+0.5),math.floor((s*255)+0.5),math.floor((v*255)+0.5)
 				ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
 			ColorPicker.RGB.RInput.InputBox.FocusLost:connect(function()
 				rgbBoxes(ColorPicker.RGB.RInput.InputBox,"R")
@@ -1485,7 +1494,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					ColorPicker.HexInput.InputBox.Text = string.format("#%02X%02X%02X",color.R*0xFF,color.G*0xFF,color.B*0xFF)
 					pcall(function()ColorPickerSettings.Callback(Color3.fromHSV(h,s,v))end)
 					ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-					SaveConfiguration()
+					--SaveConfiguration()
 				end
 				if sliderDragging then 
 					local localX = math.clamp(mouse.X-Slider.AbsolutePosition.X,0,Slider.AbsoluteSize.X)
@@ -1503,7 +1512,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					ColorPicker.HexInput.InputBox.Text = string.format("#%02X%02X%02X",color.R*0xFF,color.G*0xFF,color.B*0xFF)
 					pcall(function()ColorPickerSettings.Callback(Color3.fromHSV(h,s,v))end)
 					ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-					SaveConfiguration()
+					--SaveConfiguration()
 				end
 			end)
 
@@ -1655,7 +1664,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				if InputSettings.RemoveTextAfterFocusLost then
 					Input.InputFrame.InputBox.Text = ""
 				end
-				SaveConfiguration()
+				--SaveConfiguration()
 			end)
 
 			Input.MouseEnter:Connect(function()
@@ -1669,12 +1678,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 			Input.InputFrame.InputBox:GetPropertyChangedSignal("Text"):Connect(function()
 				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
 			end)
-
-			local InputSettings = {}
-			function InputSettings:Set(text) --Doesnt fire the event
-				Input.InputFrame.InputBox.Text = text
-			end
-			return InputSettings
 		end
 
 		-- Dropdown
@@ -1776,7 +1779,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			Dropdown.MouseLeave:Connect(function()
 				TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 			end)
-
+  
 			for _, Option in ipairs(DropdownSettings.Options) do
 				local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
 				DropdownOption.Name = Option
@@ -1883,7 +1886,10 @@ function RayfieldLibrary:CreateWindow(Settings)
 						Dropdown.List.Visible = false
 					end
 					Debounce = false	
-					SaveConfiguration()
+                    if SaveDropDown then 
+					RayfieldLibrary:SaveConfiguration()
+                    RayfieldLibrary:SaveConfigurationName()
+                    end
 				end)
 			end
 
@@ -1897,9 +1903,132 @@ function RayfieldLibrary:CreateWindow(Settings)
 				end
 			end
 
-			function DropdownSettings:Set(NewOption)
+            function DropdownSettings:RefreshDropdownOptions()
+                -- Clear existing options
+                for _, droption in ipairs(Dropdown.List:GetChildren()) do
+                   if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
+                      droption:Destroy()
+                   end
+                end
+                
+                -- Add new options
+                for _, Option in ipairs(DropdownSettings.Options) do
+                   local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
+                   DropdownOption.Name = Option
+                   DropdownOption.Title.Text = Option
+                   DropdownOption.Parent = Dropdown.List
+                   DropdownOption.Visible = true
+                   
+                   if DropdownSettings.CurrentOption == Option then
+                      DropdownOption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                   end
+                   
+                   DropdownOption.BackgroundTransparency = 1
+                   DropdownOption.UIStroke.Transparency = 1
+                   DropdownOption.Title.TextTransparency = 1
+                   
+                   -- Add event handler for option selection
+                   DropdownOption.Interact.ZIndex = 50
+                   DropdownOption.Interact.MouseButton1Click:Connect(function()
+                      if not DropdownSettings.MultipleOptions and table.find(DropdownSettings.CurrentOption, Option) then 
+                         return
+                      end
+                      
+                      -- Perform actions when an option is selected
+                      if table.find(DropdownSettings.CurrentOption, Option) then
+                         -- Option is already selected, deselect it
+                         table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, Option))
+                      else
+                         -- Option is not selected, select it
+                         if not DropdownSettings.MultipleOptions then
+                            table.clear(DropdownSettings.CurrentOption)
+                         end
+                         table.insert(DropdownSettings.CurrentOption, Option)
+                      end
+             
+                      -- Update the selected text in the dropdown
+                      if DropdownSettings.MultipleOptions then
+                         if #DropdownSettings.CurrentOption == 1 then
+                            Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+                         elseif #DropdownSettings.CurrentOption == 0 then
+                            Dropdown.Selected.Text = "None"
+                         else
+                            Dropdown.Selected.Text = "Various"
+                         end
+                      else
+                         Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+                      end
+             
+                      -- Execute the callback function
+                      local Success, Response = pcall(function()
+                         DropdownSettings.Callback(DropdownSettings.CurrentOption)
+                      end)
+             
+                      -- Handle any errors that occur during the callback execution
+                      if not Success then
+                         TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+                         TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+                         Dropdown.Title.Text = "Error"
+                         warn("Error occurred while executing Dropdown callback: " .. Response)
+                      end
+                   end)
+                end
+             end
+
+             function DropdownSettings:Set(NewOption)
 				DropdownSettings.CurrentOption = NewOption
 
+				if typeof(DropdownSettings.CurrentOption) == "string" then
+					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
+				end
+
+				if not DropdownSettings.MultipleOptions then
+					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption[1]}
+				end
+
+				if DropdownSettings.MultipleOptions then
+					if #DropdownSettings.CurrentOption == 1 then
+						Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+					elseif #DropdownSettings.CurrentOption == 0 then
+						Dropdown.Selected.Text = "None"
+					else
+						Dropdown.Selected.Text = "Various"
+					end
+				else
+					Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+				end
+
+
+				local Success, Response = pcall(function()
+					DropdownSettings.Callback(NewOption)
+				end)
+				if not Success then
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+					TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+					Dropdown.Title.Text = "Callback Error"
+					print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
+					wait(0.5)
+					Dropdown.Title.Text = DropdownSettings.Name
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+					TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+				end
+
+				for _, droption in ipairs(Dropdown.List:GetChildren()) do
+					if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
+						if not table.find(DropdownSettings.CurrentOption, droption.Name) then
+							droption.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+						else
+							droption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+						end
+					end
+				end
+				--SaveConfiguration()
+			end
+             
+             
+
+function DropdownSettings:Replace(NewOption)
+				DropdownSettings.Options = NewOption
 				if typeof(DropdownSettings.CurrentOption) == "string" then
 					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
 				end
@@ -1956,6 +2085,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return DropdownSettings
 		end
 
+
+
 		-- Keybind
 		function Tab:CreateKeybind(KeybindSettings)
 			local CheckingForKey = false
@@ -1987,7 +2118,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				CheckingForKey = false
 				if Keybind.KeybindFrame.KeybindBox.Text == nil or "" then
 					Keybind.KeybindFrame.KeybindBox.Text = KeybindSettings.CurrentKeybind
-					SaveConfiguration()
+					--SaveConfiguration()
 				end
 			end)
 
@@ -2002,13 +2133,16 @@ function RayfieldLibrary:CreateWindow(Settings)
 			UserInputService.InputBegan:Connect(function(input, processed)
 
 				if CheckingForKey then
-					if input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode ~= Enum.KeyCode.K then
+					if input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode ~= Enum.KeyCode.RightShift then
 						local SplitMessage = string.split(tostring(input.KeyCode), ".")
 						local NewKeyNoEnum = SplitMessage[3]
 						Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeyNoEnum)
 						KeybindSettings.CurrentKeybind = tostring(NewKeyNoEnum)
 						Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
-						SaveConfiguration()
+                        if SaveDropDown then 
+						RayfieldLibrary:SaveConfiguration()
+                        RayfieldLibrary:SaveConfigurationName()
+                        end
 					end
 				elseif KeybindSettings.CurrentKeybind ~= nil and (input.KeyCode == Enum.KeyCode[KeybindSettings.CurrentKeybind] and not processed) then -- Test
 					local Held = true
@@ -2056,7 +2190,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeybind)
 				KeybindSettings.CurrentKeybind = tostring(NewKeybind)
 				Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and KeybindSettings.Flag then
@@ -2155,7 +2289,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				end
 
 
-				SaveConfiguration()
+				--SaveConfiguration()
 			end)
 
 			function ToggleSettings:Set(NewToggleValue)
@@ -2201,7 +2335,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 					TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
 
 			if Settings.ConfigurationSaving then
@@ -2318,7 +2452,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 							end
 
 							SliderSettings.CurrentValue = NewValue
-							SaveConfiguration()
+							--SaveConfiguration()
 						end
 					else
 						TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Location - Slider.Main.AbsolutePosition.X > 5 and Location - Slider.Main.AbsolutePosition.X or 5, 1, 0)}):Play()
@@ -2329,7 +2463,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 			function SliderSettings:Set(NewVal)
 				TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Slider.Main.AbsoluteSize.X * ((NewVal + SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])) > 5 and Slider.Main.AbsoluteSize.X * (NewVal / (SliderSettings.Range[2] - SliderSettings.Range[1])) or 5, 1, 0)}):Play()
-				Slider.Main.Information.Text = tostring(NewVal) .. " " .. (SliderSettings.Suffix or "")
+				Slider.Main.Information.Text = tostring(NewVal) .. " " .. SliderSettings.Suffix
 				local Success, Response = pcall(function()
 					SliderSettings.Callback(NewVal)
 				end)
@@ -2344,7 +2478,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					TweenService:Create(Slider.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
 				SliderSettings.CurrentValue = NewVal
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and SliderSettings.Flag then
@@ -2419,7 +2553,7 @@ Topbar.Hide.MouseButton1Click:Connect(function()
 end)
 
 UserInputService.InputBegan:Connect(function(input, processed)
-	if (input.KeyCode == Enum.KeyCode.K and not processed) then
+	if (input.KeyCode == Enum.KeyCode.RightShift and not processed) then
 		if Debounce then return end
 		if Hidden then
 			Hidden = false
@@ -2447,18 +2581,25 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	end
 end
 
+function RayfieldLibrary:LoadConfigurationPath(Name)
+		pcall(function()
+			if isfile(ConfigurationFolder .. "/" .. tostring(Name).. ConfigurationExtension) then
+				LoadConfiguration(readfile(ConfigurationFolder .. "/" ..Name.. ConfigurationExtension))
+				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
+			end
+		end)
+end
+
 
 function RayfieldLibrary:LoadConfiguration()
-	if CEnabled then
 		pcall(function()
 			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
 				LoadConfiguration(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
 				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
 			end
 		end)
-	end
 end
 
-task.delay(3.5, RayfieldLibrary.LoadConfiguration, RayfieldLibrary)
+--task.delay(3.5, RayfieldLibrary.LoadConfiguration, RayfieldLibrary)
 
 return RayfieldLibrary
