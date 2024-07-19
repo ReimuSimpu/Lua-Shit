@@ -884,7 +884,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 	if game.Players.LocalPlayer.PlayerGui:FindFirstChild("TouchGui") then
 		Main.Size = UDim2.new(0, 100, 0, 250)
 	else
-		Main.Size = UDim2.new(0, 450, 0, 260)
+		Main.Size = UDim2.new(0, 100, 0, 250)
 	end
 	Main.Visible = true
 	Main.BackgroundTransparency = 1
