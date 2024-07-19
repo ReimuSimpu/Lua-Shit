@@ -881,11 +881,7 @@ end
 function RayfieldLibrary:CreateWindow(Settings)
 	local Passthrough = false
 	Topbar.Title.Text = Settings.Name
-	if game.Players.LocalPlayer.PlayerGui:FindFirstChild("TouchGui") then
-		Main.Size = UDim2.new(0, 0, 0, 0)
-	else
-		Main.Size = UDim2.new(0, 0, 0, 0)
-	end
+	Main.Size = UDim2.new(0, 0, 0, 0)
 	Main.Visible = true
 	Main.BackgroundTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
