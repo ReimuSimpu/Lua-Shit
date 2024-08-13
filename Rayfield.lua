@@ -1,15 +1,4 @@
---[[
-Rayfield Interface Suite
-by Sirius
-shlex | Designing + Programming
-iRay  | Programming
-]]
-
-while not game:IsLoaded() do
-	game.RunService.Heartbeat:Wait()
-end
-
-local Release = "Beta 7R"
+local Release = "Beta 8"
 local NotificationDuration = 6.5
 local RayfieldFolder = "Rayfield"
 local ConfigurationFolder = RayfieldFolder.."/Configurations"
@@ -107,9 +96,7 @@ local RayfieldLibrary = {
 			Color3.fromRGB(216, 200, 21), -- Yellow
 		},
 	},
-	DropdownIcons = {}
 }
-
 
 
 
@@ -121,36 +108,39 @@ local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local TextService = game:GetService("TextService")
-local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Interface Management
+local Rayfield = game:GetObjects("rbxassetid://10804731440")[1]
 
-local Rayfield = game:GetObjects("rbxassetid://12531161931")[1]
-
-
-
--- if gethui then
--- 	Rayfield.Parent = gethui()
--- elseif syn.protect_gui then 
--- 	syn.protect_gui(Rayfield)
--- 	Rayfield.Parent = CoreGui
--- elseif CoreGui:FindFirstChild("RobloxGui") then
--- 	Rayfield.Parent = CoreGui:FindFirstChild("RobloxGui")
--- else
--- 	Rayfield.Parent = CoreGui
--- end
+Rayfield.Enabled = false
 
 
-
-for _, Interface in ipairs(PlayerGui:GetChildren()) do
-	if Interface.Name == Rayfield.Name then
-		Interface:Destroy()
-	end
+if gethui then
+	Rayfield.Parent = gethui()
+elseif syn.protect_gui then 
+	syn.protect_gui(Rayfield)
+	Rayfield.Parent = CoreGui
+elseif CoreGui:FindFirstChild("RobloxGui") then
+	Rayfield.Parent = CoreGui:FindFirstChild("RobloxGui")
+else
+	Rayfield.Parent = CoreGui
 end
 
-Rayfield.Parent = PlayerGui
-
+if gethui then
+	for _, Interface in ipairs(gethui():GetChildren()) do
+		if Interface.Name == Rayfield.Name and Interface ~= Rayfield then
+			Interface.Enabled = false
+			Interface.Name = "Rayfield-Old"
+		end
+	end
+else
+	for _, Interface in ipairs(CoreGui:GetChildren()) do
+		if Interface.Name == Rayfield.Name and Interface ~= Rayfield then
+			Interface.Enabled = false
+			Interface.Name = "Rayfield-Old"
+		end
+	end
+end
 
 -- Object Variables
 
@@ -158,18 +148,9 @@ local Camera = workspace.CurrentCamera
 local Main = Rayfield.Main
 local Topbar = Main.Topbar
 local Elements = Main.Elements
-local LoadingFrame = Main.LoadingFrame
 local TabList = Main.TabList
 
-
 Rayfield.DisplayOrder = 100
--- LoadingFrame.Version.Text = Release
-
-
---// UI Scale
-local UIScale = Instance.new("UIScale", Main)
-UIScale.Scale = 1
-RayfieldLibrary.UIScale = UIScale
 
 
 -- Variables
@@ -181,7 +162,6 @@ local Minimised = false
 local Hidden = false
 local Debounce = false
 local Notifications = Rayfield.Notifications
-local isMobile = UserInputService.TouchEnabled
 
 local SelectedTheme = RayfieldLibrary.Theme.Default
 
@@ -218,17 +198,9 @@ end
 
 local function AddDraggingFunctionality(DragPoint, Main)
 	pcall(function()
-		local Dragging, DragInput, TouchInput, MousePos, FramePos = false
-
-		local function UpdatePosition(Input)
-			local Delta = Input.Position - MousePos
-			TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				Position = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
-			}):Play()
-		end
-
+		local Dragging, DragInput, MousePos, FramePos = false
 		DragPoint.InputBegan:Connect(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
 				Dragging = true
 				MousePos = Input.Position
 				FramePos = Main.Position
@@ -240,21 +212,19 @@ local function AddDraggingFunctionality(DragPoint, Main)
 				end)
 			end
 		end)
-
 		DragPoint.InputChanged:Connect(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+			if Input.UserInputType == Enum.UserInputType.MouseMovement then
 				DragInput = Input
 			end
 		end)
-
 		UserInputService.InputChanged:Connect(function(Input)
-			if (Input == DragInput or Input.UserInputType == Enum.UserInputType.Touch) and Dragging then
-				UpdatePosition(Input)
+			if Input == DragInput and Dragging then
+				local Delta = Input.Position - MousePos
+				TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position  = UDim2.new(FramePos.X.Scale,FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
 			end
 		end)
 	end)
-end
-
+end   
 
 local function PackColor(Color)
 	return {R = Color.R * 255, G = Color.G * 255, B = Color.B * 255}
@@ -266,7 +236,7 @@ end
 
 local function LoadConfiguration(Configuration)
 	local Data = HttpService:JSONDecode(Configuration)
-	table.foreach(Data, function(FlagName, FlagValue)
+	for FlagName, FlagValue in next, Data do
 		if RayfieldLibrary.Flags[FlagName] then
 			spawn(function() 
 				if RayfieldLibrary.Flags[FlagName].Type == "ColorPicker" then
@@ -276,13 +246,13 @@ local function LoadConfiguration(Configuration)
 				end    
 			end)
 		else
+
 			RayfieldLibrary:Notify({Title = "Flag Error", Content = "Rayfield was unable to find '"..FlagName.. "'' in the current script"})
 		end
-	end)
+	end
 end
 
-local function SaveConfiguration()
-	if not CEnabled then return end
+function RayfieldLibrary:SaveConfigurationName(Name)
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
 		if v.Type == "ColorPicker" then
@@ -291,8 +261,28 @@ local function SaveConfiguration()
 			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption or v.Color
 		end
 	end	
-	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    getgenv().SaveDropDown = true
+	writefile(ConfigurationFolder .. "/" .. Name.. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    wait(0.3)
+    getgenv().SaveDropDown = false
 end
+
+
+function RayfieldLibrary:SaveConfiguration()
+	local Data = {}
+	for i,v in pairs(RayfieldLibrary.Flags) do
+		if v.Type == "ColorPicker" then
+			Data[i] = PackColor(v.Color)
+		else
+			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption or v.Color
+		end
+	end	
+    getgenv().SaveDropDown = true
+	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+    wait(0.3)
+    getgenv().SaveDropDown = false
+end
+
 
 local neon = (function() -- Open sourced neon module
 	local module = {}
@@ -660,12 +650,6 @@ function RayfieldLibrary:Notify(NotificationSettings)
 end
 
 function Hide()
-
-	-- if isMobile then
-	-- 	RayfieldLibrary:Notify({Title = "Interface", Content = "Mobile players cannot hide the UI, only minimize", Duration = 4})
-	-- 	return
-	-- end
-
 	Debounce = true
 	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping RightShift", Duration = 7})
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 400)}):Play()
@@ -704,7 +688,7 @@ function Hide()
 							TweenService:Create(element.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 						end
 						for _, child in ipairs(element:GetChildren()) do
-							if child.ClassName == "Frame" or child.ClassName == "TextLabel" or child.ClassName == "TextBox" or child.ClassName == "ImageButton" or (child.ClassName == "ImageLabel" and table.find(RayfieldLibrary.DropdownIcons, child)) then
+							if child.ClassName == "Frame" or child.ClassName == "TextLabel" or child.ClassName == "TextBox" or child.ClassName == "ImageButton" or child.ClassName == "ImageLabel" then
 								child.Visible = false
 							end
 						end
@@ -769,7 +753,7 @@ function Unhide()
 							TweenService:Create(element.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 						end
 						for _, child in ipairs(element:GetChildren()) do
-							if child.ClassName == "Frame" or child.ClassName == "TextLabel" or child.ClassName == "TextBox" or child.ClassName == "ImageButton" or (child.ClassName == "ImageLabel" and table.find(RayfieldLibrary.DropdownIcons, child)) then
+							if child.ClassName == "Frame" or child.ClassName == "TextLabel" or child.ClassName == "TextBox" or child.ClassName == "ImageButton" or child.ClassName == "ImageLabel" then
 								child.Visible = true
 							end
 						end
@@ -812,7 +796,7 @@ function Maximise()
 							TweenService:Create(element.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 						end
 						for _, child in ipairs(element:GetChildren()) do
-							if child.ClassName == "Frame" or child.ClassName == "TextLabel" or child.ClassName == "TextBox" or child.ClassName == "ImageButton" or (child.ClassName == "ImageLabel" and table.find(RayfieldLibrary.DropdownIcons, child)) then
+							if child.ClassName == "Frame" or child.ClassName == "TextLabel" or child.ClassName == "TextBox" or child.ClassName == "ImageButton" or child.ClassName == "ImageLabel" then
 								child.Visible = true
 							end
 						end
@@ -913,8 +897,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 	LoadingFrame.Shadow.ImageTransparency = 1
 	Main.Shadow.Image.ImageTransparency = 1
 	LoadingFrame.Quote.TextTransparency = 1
-	LoadingFrame.Title.Text = Settings.LoadingTitle or "Rayfield Interface Suite"
-	--LoadingFrame.Version.Text = ("Version "..Settings.Version) or "Version N/A"
+	LoadingFrame.Title.Text = Settings.LoadingTitle or "Hippo Hub"
 	LoadingFrame.Thumbnail.Image = "rbxassetid://"..Settings.Image
 	Topbar.Visible = false
 	Elements.Visible = false
@@ -959,6 +942,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			TabButton.UIStroke.Transparency = 1
 		end
 	end
+
 	if Settings.Discord then
 		if not isfolder(RayfieldFolder.."/Discord Invites") then
 			makefolder(RayfieldFolder.."/Discord Invites")
@@ -998,12 +982,17 @@ function RayfieldLibrary:CreateWindow(Settings)
 			makefolder(RayfieldFolder.."/Key System")
 		end
 
+		if typeof(Settings.KeySettings.Key) == "string" then Settings.KeySettings.Key = {Settings.KeySettings.Key} end
+
 		if Settings.KeySettings.GrabKeyFromSite then
-			local Success, Response = pcall(function()
-				Settings.KeySettings.Key = game:HttpGet(Settings.KeySettings.Key)
-			end)
-			if not Success then
-				print("Rayfield | "..Settings.KeySettings.Key.." Error " ..tostring(Response))
+			for i, Key in ipairs(Settings.KeySettings.Key) do
+				local Success, Response = pcall(function()
+					Settings.KeySettings.Key[i] = tostring(game:HttpGet(Key):gsub("[\n\r]", " "))
+					Settings.KeySettings.Key[i] = string.gsub(Settings.KeySettings.Key[i], " ", "")
+				end)
+				if not Success then
+					print("Rayfield | "..Key.." Error " ..tostring(Response))
+				end
 			end
 		end
 
@@ -1012,8 +1001,10 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 
 		if isfile(RayfieldFolder.."/Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) then
-			if readfile(RayfieldFolder.."/Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension) == Settings.KeySettings.Key then
-				Passthrough = true
+			for _, MKey in ipairs(Settings.KeySettings.Key) do
+				if string.find(readfile(RayfieldFolder.."/Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension), MKey) then
+					Passthrough = true
+				end
 			end
 		end
 
@@ -1026,9 +1017,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 				KeyUI.Parent = gethui()
 			elseif syn.protect_gui then
 				syn.protect_gui(Rayfield)
-				KeyUI.Parent = PlayerGui
+				KeyUI.Parent = CoreGui
 			else
-				KeyUI.Parent = PlayerGui
+				KeyUI.Parent = CoreGui
 			end
 
 			if gethui then
@@ -1039,7 +1030,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					end
 				end
 			else
-				for _, Interface in ipairs(PlayerGui:GetChildren()) do
+				for _, Interface in ipairs(CoreGui:GetChildren()) do
 					if Interface.Name == KeyUI.Name and Interface ~= KeyUI then
 						Interface.Enabled = false
 						Interface.Name = "KeyUI-Old"
@@ -1084,7 +1075,16 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 
 			KeyUI.Main.Input.InputBox.FocusLost:Connect(function()
-				if KeyMain.Input.InputBox.Text == Settings.KeySettings.Key then
+				if #KeyUI.Main.Input.InputBox.Text == 0 then return end
+				local KeyFound = false
+				local FoundKey = ''
+				for _, MKey in ipairs(Settings.KeySettings.Key) do
+					if string.find(KeyMain.Input.InputBox.Text, MKey) then
+						KeyFound = true
+						FoundKey = MKey
+					end
+				end
+				if KeyFound then 
 					TweenService:Create(KeyMain, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
 					TweenService:Create(KeyMain, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 467, 0, 175)}):Play()
 					TweenService:Create(KeyMain.Shadow.Image, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
@@ -1101,7 +1101,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					Passthrough = true
 					if Settings.KeySettings.SaveKey then
 						if writefile then
-							writefile(RayfieldFolder.."/Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension, Settings.KeySettings.Key)
+							writefile(RayfieldFolder.."/Key System".."/"..Settings.KeySettings.FileName..ConfigurationExtension, FoundKey)
 						end
 						RayfieldLibrary:Notify({Title = "Key System", Content = "The key for this script has been saved successfully"})
 					end
@@ -1167,13 +1167,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.55}):Play()
 	wait(0.1)
-	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-	wait(0.05)
-	TweenService:Create(LoadingFrame.Thumbnail, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-	TweenService:Create(LoadingFrame.Shadow, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-	wait(0.05)
-	TweenService:Create(LoadingFrame.Quote, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-
 	Elements.Template.LayoutOrder = 100000
 	Elements.Template.Visible = false
 
@@ -1183,23 +1176,14 @@ function RayfieldLibrary:CreateWindow(Settings)
 	-- Tab
 	local FirstTab = false
 	local Window = {}
-	function Window:CreateTab(Name, Image)
+	function Window:CreateTab(Name,Image)
 		local SDone = false
 		local TabButton = TabList.Template:Clone()
 		TabButton.Name = Name
 		TabButton.Title.Text = Name
 		TabButton.Parent = TabList
 		TabButton.Title.TextWrapped = false
-		TabButton.Title.RichText = true
-
-		-- Calculate the text size with the current properties
-		local function calculateTextSize()
-			return TextService:GetTextSize(TabButton.Title.Text, TabButton.Title.TextSize, TabButton.Title.Font,  Vector2.new(math.huge, TabButton.Title.AbsoluteSize.Y))
-		end
-
-		local textSize = calculateTextSize()
-		TabButton.Title.Size = UDim2.new(0, textSize.X, 0, 14)
-		--TabButton.Size = UDim2.new(0, textSize.X + 30, 0, 30)
+		TabButton.Size = UDim2.new(0, TabButton.Title.TextBounds.X + 30, 0, 30)
 
 		if Image then
 			TabButton.Title.AnchorPoint = Vector2.new(0, 0.5)
@@ -1207,12 +1191,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			TabButton.Image.Image = "rbxassetid://"..Image
 			TabButton.Image.Visible = true
 			TabButton.Title.TextXAlignment = Enum.TextXAlignment.Left
-
-			textSize = calculateTextSize()
-			TabButton.Title.Size = UDim2.new(0, textSize.X, 0, 14)
-			TabButton.Size = UDim2.new(0, textSize.X + 46, 0, 30)
-
-			TabButton.Image.ImageColor3 = Color3.fromRGB(255, 255, 255)
+			TabButton.Size = UDim2.new(0, TabButton.Title.TextBounds.X + 46, 0, 30)
 		end
 
 		TabButton.BackgroundTransparency = 1
@@ -1251,16 +1230,18 @@ function RayfieldLibrary:CreateWindow(Settings)
 		wait(0.1)
 		if FirstTab then
 			TabButton.BackgroundColor3 = SelectedTheme.TabBackground
+			TabButton.Image.ImageColor3 = SelectedTheme.TabTextColor
 			TabButton.Title.TextColor3 = SelectedTheme.TabTextColor
 			TweenService:Create(TabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.7}):Play()
 			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0.2}):Play()
-			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.2}):Play()
 			TweenService:Create(TabButton.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 
 			TweenService:Create(TabButton.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.7}):Play()
 		else
 			FirstTab = Name
 			TabButton.BackgroundColor3 = SelectedTheme.TabBackgroundSelected
+			TabButton.Image.ImageColor3 = SelectedTheme.SelectedTabTextColor
 			TabButton.Title.TextColor3 = SelectedTheme.SelectedTabTextColor
 			TweenService:Create(TabButton.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.9}):Play()
 			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
@@ -1277,15 +1258,17 @@ function RayfieldLibrary:CreateWindow(Settings)
 			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
 			TweenService:Create(TabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.TabBackgroundSelected}):Play()
 			TweenService:Create(TabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextColor3 = SelectedTheme.SelectedTabTextColor}):Play()
+			TweenService:Create(TabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageColor3 = SelectedTheme.SelectedTabTextColor}):Play()
 			TweenService:Create(TabButton.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.9}):Play()
 
 			for _, OtherTabButton in ipairs(TabList:GetChildren()) do
 				if OtherTabButton.Name ~= "Template" and OtherTabButton.ClassName == "Frame" and OtherTabButton ~= TabButton and OtherTabButton.Name ~= "Placeholder" then
 					TweenService:Create(OtherTabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.TabBackground}):Play()
 					TweenService:Create(OtherTabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextColor3 = SelectedTheme.TabTextColor}):Play()
+					TweenService:Create(OtherTabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageColor3 = SelectedTheme.TabTextColor}):Play()
 					TweenService:Create(OtherTabButton, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.7}):Play()
 					TweenService:Create(OtherTabButton.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0.2}):Play()
-					TweenService:Create(OtherTabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
+					TweenService:Create(OtherTabButton.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.2}):Play()
 					TweenService:Create(OtherTabButton.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.7}):Play()
 					TweenService:Create(OtherTabButton.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
@@ -1334,7 +1317,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.9}):Play()
 					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				else
-					SaveConfiguration()
+					--SaveConfiguration()
 					TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
@@ -1358,15 +1341,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 			function ButtonValue:Set(NewButton)
 				Button.Title.Text = NewButton
 				Button.Name = NewButton
-			end
-
-			function ButtonValue:Visible(Visiblity)
-
-				if type(Visiblity) == "boolean" then
- 					Button.Visible = Visiblity
-				end
-
-				return
 			end
 
 			return ButtonValue
@@ -1434,7 +1408,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			game:GetService("UserInputService").InputEnded:Connect(function(input, gameProcessed) if input.UserInputType == Enum.UserInputType.MouseButton1 then 
 					mainDragging = false
 					sliderDragging = false
-			end end)
+				end end)
 			Main.MouseButton1Down:Connect(function()
 				if opened then
 					mainDragging = true 
@@ -1489,7 +1463,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				pcall(function()ColorPickerSettings.Callback(Color3.fromHSV(h,s,v))end)
 				local r,g,b = math.floor((h*255)+0.5),math.floor((s*255)+0.5),math.floor((v*255)+0.5)
 				ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-				SaveConfiguration()
+				--SaveConfiguration()
 			end)
 			--RGB
 			local function rgbBoxes(box,toChange)
@@ -1508,7 +1482,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				end
 				local r,g,b = math.floor((h*255)+0.5),math.floor((s*255)+0.5),math.floor((v*255)+0.5)
 				ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
 			ColorPicker.RGB.RInput.InputBox.FocusLost:connect(function()
 				rgbBoxes(ColorPicker.RGB.RInput.InputBox,"R")
@@ -1541,7 +1515,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					ColorPicker.HexInput.InputBox.Text = string.format("#%02X%02X%02X",color.R*0xFF,color.G*0xFF,color.B*0xFF)
 					pcall(function()ColorPickerSettings.Callback(Color3.fromHSV(h,s,v))end)
 					ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-					SaveConfiguration()
+					--SaveConfiguration()
 				end
 				if sliderDragging then 
 					local localX = math.clamp(mouse.X-Slider.AbsolutePosition.X,0,Slider.AbsoluteSize.X)
@@ -1559,7 +1533,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 					ColorPicker.HexInput.InputBox.Text = string.format("#%02X%02X%02X",color.R*0xFF,color.G*0xFF,color.B*0xFF)
 					pcall(function()ColorPickerSettings.Callback(Color3.fromHSV(h,s,v))end)
 					ColorPickerSettings.Color = Color3.fromRGB(r,g,b)
-					SaveConfiguration()
+					--SaveConfiguration()
 				end
 			end)
 
@@ -1640,22 +1614,13 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 			local Paragraph = Elements.Template.Paragraph:Clone()
 			Paragraph.Title.Text = ParagraphSettings.Title
-			Paragraph.Content.Text = ParagraphSettings.Content.."\n"
+			Paragraph.Content.Text = ParagraphSettings.Content
 			Paragraph.Visible = true
 			Paragraph.Parent = TabPage
 
-			local textSize = TextService:GetTextSize(
-				Paragraph.Content.Text,
-				Paragraph.Content.TextSize,
-				Paragraph.Content.Font,
-				Vector2.new(Paragraph.Content.AbsoluteSize.X, Paragraph.Content.AbsoluteSize.Y)
-			)
-
-			Paragraph.Content.Size = UDim2.new(0, 438, 0, textSize.Y)
-			Paragraph.Content.Position = UDim2.new(0.037, 0, 1, 0)
-
-			Paragraph.Size = UDim2.new(1, -10, 0, textSize.Y + 25)
-
+			Paragraph.Content.Size = UDim2.new(0, 438, 0, Paragraph.Content.TextBounds.Y)
+			Paragraph.Content.Position = UDim2.new(1, -10, 0.575,0 )
+			Paragraph.Size = UDim2.new(1, -10, 0, Paragraph.Content.TextBounds.Y + 40)
 
 			Paragraph.BackgroundTransparency = 1
 			Paragraph.UIStroke.Transparency = 1
@@ -1672,20 +1637,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 			function ParagraphValue:Set(NewParagraphSettings)
 				Paragraph.Title.Text = NewParagraphSettings.Title
-				Paragraph.Content.Text = NewParagraphSettings.Content.."\n"
-
-				local textSize = TextService:GetTextSize(
-					Paragraph.Content.Text,
-					Paragraph.Content.TextSize,
-					Paragraph.Content.Font,
-					Vector2.new(Paragraph.Content.AbsoluteSize.X, math.huge)
-				)
-
-				Paragraph.Content.Size = UDim2.new(0, 438, 0, textSize.Y)
-				Paragraph.Content.Position = UDim2.new(0.037, 0, 1, 0)
-
-				Paragraph.Size = UDim2.new(1, -10, 0, textSize.Y + 25)
-
+				Paragraph.Content.Text = NewParagraphSettings.Content
 			end
 
 			return ParagraphValue
@@ -1711,12 +1663,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			TweenService:Create(Input.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
 			Input.InputFrame.InputBox.PlaceholderText = InputSettings.PlaceholderText
-
-			local function calculateTextSize(placeholder)
-				return TextService:GetTextSize((placeholder and Input.InputFrame.InputBox.PlaceholderText or Input.InputFrame.InputBox.Text), Input.InputFrame.InputBox.TextSize, Input.InputFrame.InputBox.Font, Vector2.new(math.huge,  Input.InputFrame.InputBox.AbsoluteSize.Y))
-			end
-
-			Input.InputFrame.Size = UDim2.new(0, calculateTextSize(true).X + 24, 0, 30)
+			Input.InputFrame.Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)
 
 			Input.InputFrame.InputBox.FocusLost:Connect(function()
 
@@ -1750,162 +1697,329 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end)
 
 			Input.InputFrame.InputBox:GetPropertyChangedSignal("Text"):Connect(function()
-				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, calculateTextSize().X + 24, 0, 30)}):Play()
+				TweenService:Create(Input.InputFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Input.InputFrame.InputBox.TextBounds.X + 24, 0, 30)}):Play()
 			end)
 		end
 
 		-- Dropdown
-function Tab:CreateDropdown(DropdownSettings)
-    local Dropdown = Elements.Template.Dropdown:Clone()
-    
-    -- Handle Dropdown name and title based on whether it's a string or table
-    local dropdownName
-    if typeof(DropdownSettings.Name) == "string" then
-        dropdownName = DropdownSettings.Name
-    elseif typeof(DropdownSettings.Name) == "table" then
-        dropdownName = table.concat(DropdownSettings.Name, " ")  -- Concatenate table elements with a space
-    else
-        dropdownName = "Dropdown"
-    end
+		function Tab:CreateDropdown(DropdownSettings)
+			local Dropdown = Elements.Template.Dropdown:Clone()
+			if string.find(DropdownSettings.Name,"closed") then
+				Dropdown.Name = "Dropdown"
+			else
+				Dropdown.Name = DropdownSettings.Name
+			end
+			Dropdown.Title.Text = DropdownSettings.Name
+			Dropdown.Visible = true
+			Dropdown.Parent = TabPage
 
-    if string.find(dropdownName, "closed") then
-        Dropdown.Name = "Dropdown"
-    else
-        Dropdown.Name = dropdownName
-    end
-    Dropdown.Title.Text = dropdownName
+			Dropdown.List.Visible = false
 
-    -- Icon handling
-    if DropdownSettings.Icon ~= nil then
-        table.insert(RayfieldLibrary.DropdownIcons, Dropdown.Icon)
-        Dropdown.Title.Position = UDim2.fromOffset(152, 21)
-        Dropdown.Icon.Visible = true
-        Dropdown.Icon.Image = DropdownSettings.Icon
-    end
+			if typeof(DropdownSettings.CurrentOption) == "string" then
+				DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
+			end
 
-    Dropdown.Visible = true
-    Dropdown.Parent = TabPage
-    Dropdown.List.Visible = false
+			if not DropdownSettings.MultipleOptions then
+				DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption[1]}
+			end
 
-    -- Handle multi-selection
-    if DropdownSettings.Multi then
-        Dropdown.Selected.Text = table.concat(DropdownSettings.CurrentOption, ", ")
-    else
-        Dropdown.Selected.Text = DropdownSettings.CurrentOption
-    end
-
-    Dropdown.BackgroundTransparency = 1
-    Dropdown.UIStroke.Transparency = 1
-    Dropdown.Title.TextTransparency = 1
-    Dropdown.Icon.ImageTransparency = 1
-    Dropdown.Size = UDim2.new(1, -10, 0, 45)
-
-    -- Apply animations
-    TweenService:Create(Dropdown, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-    TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-    TweenService:Create(Dropdown.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()    
-    TweenService:Create(Dropdown.Icon, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-
-    -- Clean up unused options
-    for _, ununusedoption in ipairs(Dropdown.List:GetChildren()) do
-        if ununusedoption.ClassName == "Frame" and ununusedoption.Name ~= "Placeholder" and ununusedoption.Name ~= "Search" then
-            ununusedoption:Destroy()
-        end
-    end
-
-    Dropdown.Toggle.Rotation = 180
-
-    -- Dropdown interaction handling
-    Dropdown.Interact.MouseButton1Click:Connect(function()
-        TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
-        TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-        wait(0.1)
-        TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-        TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-
-        if Debounce then return end
-        if Dropdown.List.Visible then
-            Debounce = true
-            TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
-            for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
-                if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-                    TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-                    TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-                    if DropdownOpt:FindFirstChild("Title") then
-                        TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-                    else
-                        TweenService:Create(DropdownOpt.Search, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-                    end
-                    if DropdownOpt:FindFirstChild("Icon") then
-                        TweenService:Create(DropdownOpt.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-                    end
-                    if DropdownOpt:FindFirstChild("Interact") then
-                        TweenService:Create(DropdownOpt.Interact.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-                        TweenService:Create(DropdownOpt.Interact.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-                        TweenService:Create(DropdownOpt.Interact.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-                        TweenService:Create(DropdownOpt.Interact, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-                    end
-                end
-            end
-            TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
-            TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()    
-            wait(0.35)
-            Dropdown.List.Visible = false
-            Debounce = false
-        else
-            TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0.353, 180)}):Play()
-            Dropdown.List.Visible = true
-            TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 0.7}):Play()
-            TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 0}):Play()    
-            for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
-                if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-                    TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-                    TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-                    if DropdownOpt:FindFirstChild("Title") then
-                        TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-                    else
-                        TweenService:Create(DropdownOpt.Search, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-                    end
-                    if DropdownOpt:FindFirstChild("Icon") then
-                        TweenService:Create(DropdownOpt.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-                    end
-                    if DropdownOpt:FindFirstChild("Interact") then
-                        TweenService:Create(DropdownOpt.Interact.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-
-                        if (DropdownSettings.Multi and table.find(DropdownSettings.CurrentOption, DropdownOpt.Name)) or (not DropdownSettings.Multi and DropdownSettings.CurrentOption == DropdownOpt.Name) then
-                            TweenService:Create(DropdownOpt.Interact.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-                            TweenService:Create(DropdownOpt.Interact.Shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.7}):Play()
-                        end
-
-                        TweenService:Create(DropdownOpt.Interact, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-                    end
-                end
-            end
-        end
-    end)
-
-    -- Mouse hover effects
-    Dropdown.MouseEnter:Connect(function()
-        if not Dropdown.List.Visible then
-            TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
-        end
-    end)
-    Dropdown.MouseLeave:Connect(function()
-        if not Dropdown.List.Visible then
-            TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-        end
-    end)
-end
-
-
-
-			function DropdownSettings:Set(NewOption)
-				if DropdownSettings.Multi then
-					Dropdown.Selected.Text = table.concat(NewOption, ", ")
+			if DropdownSettings.MultipleOptions then
+				if #DropdownSettings.CurrentOption == 1 then
+					Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+				elseif #DropdownSettings.CurrentOption == 0 then
+					Dropdown.Selected.Text = "None"
 				else
-					Dropdown.Selected.Text = NewOption
+					Dropdown.Selected.Text = "Various"
 				end
+			else
+				Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+			end
+
+
+			Dropdown.BackgroundTransparency = 1
+			Dropdown.UIStroke.Transparency = 1
+			Dropdown.Title.TextTransparency = 1
+
+			Dropdown.Size = UDim2.new(1, -10, 0, 45)
+
+			TweenService:Create(Dropdown, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Dropdown.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+
+			for _, ununusedoption in ipairs(Dropdown.List:GetChildren()) do
+				if ununusedoption.ClassName == "Frame" and ununusedoption.Name ~= "Placeholder" then
+					ununusedoption:Destroy()
+				end
+			end
+
+			Dropdown.Toggle.Rotation = 180
+
+			Dropdown.Interact.MouseButton1Click:Connect(function()
+				TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+				wait(0.1)
+				TweenService:Create(Dropdown, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+				TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+				if Debounce then return end
+				if Dropdown.List.Visible then
+					Debounce = true
+					TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
+					for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
+						if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
+							TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
+							TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+						end
+					end
+					TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
+					TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
+					wait(0.35)
+					Dropdown.List.Visible = false
+					Debounce = false
+				else
+					TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 180)}):Play()
+					Dropdown.List.Visible = true
+					TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 0.7}):Play()
+					TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 0}):Play()	
+					for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
+						if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
+							TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+							TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
+						end
+					end
+				end
+			end)
+
+			Dropdown.MouseEnter:Connect(function()
+				if not Dropdown.List.Visible then
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				end
+			end)
+
+			Dropdown.MouseLeave:Connect(function()
+				TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+			end)
+  
+			for _, Option in ipairs(DropdownSettings.Options) do
+				local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
+				DropdownOption.Name = Option
+				DropdownOption.Title.Text = Option
+				DropdownOption.Parent = Dropdown.List
+				DropdownOption.Visible = true
+
+				if DropdownSettings.CurrentOption == Option then
+					DropdownOption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+				end
+
+				DropdownOption.BackgroundTransparency = 1
+				DropdownOption.UIStroke.Transparency = 1
+				DropdownOption.Title.TextTransparency = 1
+
+				--local Dropdown = Tab:CreateDropdown({
+				--	Name = "Dropdown Example",
+				--	Options = {"Option 1","Option 2"},
+				--	CurrentOption = {"Option 1"},
+				--  MultipleOptions = true,
+				--	Flag = "Dropdown1",
+				--	Callback = function(TableOfOptions)
+
+				--	end,
+				--})
+
+
+				DropdownOption.Interact.ZIndex = 50
+				DropdownOption.Interact.MouseButton1Click:Connect(function()
+					if not DropdownSettings.MultipleOptions and table.find(DropdownSettings.CurrentOption, Option) then 
+						return
+					end
+
+					if table.find(DropdownSettings.CurrentOption, Option) then
+						table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, Option))
+						if DropdownSettings.MultipleOptions then
+							if #DropdownSettings.CurrentOption == 1 then
+								Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+							elseif #DropdownSettings.CurrentOption == 0 then
+								Dropdown.Selected.Text = "None"
+							else
+								Dropdown.Selected.Text = "Various"
+							end
+						else
+							Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+						end
+					else
+						if not DropdownSettings.MultipleOptions then
+							table.clear(DropdownSettings.CurrentOption)
+						end
+						table.insert(DropdownSettings.CurrentOption, Option)
+						if DropdownSettings.MultipleOptions then
+							if #DropdownSettings.CurrentOption == 1 then
+								Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+							elseif #DropdownSettings.CurrentOption == 0 then
+								Dropdown.Selected.Text = "None"
+							else
+								Dropdown.Selected.Text = "Various"
+							end
+						else
+							Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+						end
+						TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+						TweenService:Create(DropdownOption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+						Debounce = true
+						wait(0.2)
+						TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+					end
+
+
+					local Success, Response = pcall(function()
+						DropdownSettings.Callback(DropdownSettings.CurrentOption)
+					end)
+
+					if not Success then
+						TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+						TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+						Dropdown.Title.Text = "Callback Error"
+						print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
+						wait(0.5)
+						Dropdown.Title.Text = DropdownSettings.Name
+						TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+						TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+					end
+
+					for _, droption in ipairs(Dropdown.List:GetChildren()) do
+						if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" and not table.find(DropdownSettings.CurrentOption, droption.Name) then
+							TweenService:Create(droption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+						end
+					end
+					if not DropdownSettings.MultipleOptions then
+						wait(0.1)
+						TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
+						for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
+							if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
+								TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
+								TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+								TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+							end
+						end
+						TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
+						TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
+						wait(0.35)
+						Dropdown.List.Visible = false
+					end
+					Debounce = false	
+                    if SaveDropDown then 
+					RayfieldLibrary:SaveConfiguration()
+                    RayfieldLibrary:SaveConfigurationName()
+                    end
+				end)
+			end
+
+			for _, droption in ipairs(Dropdown.List:GetChildren()) do
+				if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
+					if not table.find(DropdownSettings.CurrentOption, droption.Name) then
+						droption.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+					else
+						droption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+					end
+				end
+			end
+
+            function DropdownSettings:RefreshDropdownOptions()
+                -- Clear existing options
+                for _, droption in ipairs(Dropdown.List:GetChildren()) do
+                   if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
+                      droption:Destroy()
+                   end
+                end
+                
+                -- Add new options
+                for _, Option in ipairs(DropdownSettings.Options) do
+                   local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
+                   DropdownOption.Name = Option
+                   DropdownOption.Title.Text = Option
+                   DropdownOption.Parent = Dropdown.List
+                   DropdownOption.Visible = true
+                   
+                   if DropdownSettings.CurrentOption == Option then
+                      DropdownOption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                   end
+                   
+                   DropdownOption.BackgroundTransparency = 1
+                   DropdownOption.UIStroke.Transparency = 1
+                   DropdownOption.Title.TextTransparency = 1
+                   
+                   -- Add event handler for option selection
+                   DropdownOption.Interact.ZIndex = 50
+                   DropdownOption.Interact.MouseButton1Click:Connect(function()
+                      if not DropdownSettings.MultipleOptions and table.find(DropdownSettings.CurrentOption, Option) then 
+                         return
+                      end
+                      
+                      -- Perform actions when an option is selected
+                      if table.find(DropdownSettings.CurrentOption, Option) then
+                         -- Option is already selected, deselect it
+                         table.remove(DropdownSettings.CurrentOption, table.find(DropdownSettings.CurrentOption, Option))
+                      else
+                         -- Option is not selected, select it
+                         if not DropdownSettings.MultipleOptions then
+                            table.clear(DropdownSettings.CurrentOption)
+                         end
+                         table.insert(DropdownSettings.CurrentOption, Option)
+                      end
+             
+                      -- Update the selected text in the dropdown
+                      if DropdownSettings.MultipleOptions then
+                         if #DropdownSettings.CurrentOption == 1 then
+                            Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+                         elseif #DropdownSettings.CurrentOption == 0 then
+                            Dropdown.Selected.Text = "None"
+                         else
+                            Dropdown.Selected.Text = "Various"
+                         end
+                      else
+                         Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+                      end
+             
+                      -- Execute the callback function
+                      local Success, Response = pcall(function()
+                         DropdownSettings.Callback(DropdownSettings.CurrentOption)
+                      end)
+             
+                      -- Handle any errors that occur during the callback execution
+                      if not Success then
+                         TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+                         TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+                         Dropdown.Title.Text = "Error"
+                         warn("Error occurred while executing Dropdown callback: " .. Response)
+                      end
+                   end)
+                end
+             end
+
+             function DropdownSettings:Set(NewOption)
 				DropdownSettings.CurrentOption = NewOption
+
+				if typeof(DropdownSettings.CurrentOption) == "string" then
+					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
+				end
+
+				if not DropdownSettings.MultipleOptions then
+					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption[1]}
+				end
+
+				if DropdownSettings.MultipleOptions then
+					if #DropdownSettings.CurrentOption == 1 then
+						Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+					elseif #DropdownSettings.CurrentOption == 0 then
+						Dropdown.Selected.Text = "None"
+					else
+						Dropdown.Selected.Text = "Various"
+					end
+				else
+					Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+				end
+
+
 				local Success, Response = pcall(function()
 					DropdownSettings.Callback(NewOption)
 				end)
@@ -1921,162 +2035,66 @@ end
 				end
 
 				for _, droption in ipairs(Dropdown.List:GetChildren()) do
-					if (DropdownSettings.Multi and not table.find(NewOption, droption.Name)) or (not DropdownSettings.Multi and droption.Name ~= NewOption) then
-						if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" and droption.Name ~= "Search" then
+					if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
+						if not table.find(DropdownSettings.CurrentOption, droption.Name) then
 							droption.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+						else
+							droption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 						end
+					end
+				end
+				--SaveConfiguration()
+			end
+             
+             
+
+function DropdownSettings:Replace(NewOption)
+				DropdownSettings.Options = NewOption
+				if typeof(DropdownSettings.CurrentOption) == "string" then
+					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption}
+				end
+
+				if not DropdownSettings.MultipleOptions then
+					DropdownSettings.CurrentOption = {DropdownSettings.CurrentOption[1]}
+				end
+
+				if DropdownSettings.MultipleOptions then
+					if #DropdownSettings.CurrentOption == 1 then
+						Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
+					elseif #DropdownSettings.CurrentOption == 0 then
+						Dropdown.Selected.Text = "None"
 					else
-						droption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+						Dropdown.Selected.Text = "Various"
 					end
-				end
-			end
-
-			function DropdownSettings:UpdateOptions(NewOptions)
-				TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
-				for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
-					if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-						TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-						TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-						if DropdownOpt:FindFirstChild("Title") then
-							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-						else
-							TweenService:Create(DropdownOpt.Search, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-						end
-						if DropdownOpt:FindFirstChild("Icon") then
-							TweenService:Create(DropdownOpt.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-						end
-					end
-				end
-				TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
-				TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
-				wait(0.35)
-				Dropdown.List.Visible = false
-
-				DropdownSettings.Options = NewOptions
-				if DropdownSettings.Multi then
-					DropdownSettings.CurrentOption = {}
-					Dropdown.Selected.Text = table.concat(DropdownSettings.CurrentOption, ", ")
 				else
-					DropdownSettings.CurrentOption = ""
-					Dropdown.Selected.Text = DropdownSettings.CurrentOption
+					Dropdown.Selected.Text = DropdownSettings.CurrentOption[1]
 				end
-				for i,v in ipairs(Dropdown.List:GetChildren()) do
-					if v.ClassName == "Frame" and v.Name ~= "Placeholder" and v.Name ~= "Search" then
-						v:Destroy()
-					end
+
+
+				local Success, Response = pcall(function()
+					DropdownSettings.Callback(NewOption)
+				end)
+				if not Success then
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+					TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+					Dropdown.Title.Text = "Callback Error"
+					print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
+					wait(0.5)
+					Dropdown.Title.Text = DropdownSettings.Name
+					TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+					TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
-				for _, Option in ipairs(DropdownSettings.Options) do
-					local DropdownOption = Elements.Template.Dropdown.List.Template:Clone()
-					DropdownOption.Name = Option
-					DropdownOption.Title.Text = Option
-					DropdownOption.Parent = Dropdown.List
-					DropdownOption.Visible = true
 
-					if (DropdownSettings.Multi and table.find(DropdownSettings.CurrentOption, Option)) or (not DropdownSettings.Multi and DropdownSettings.CurrentOption == Option) then
-						DropdownOption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-					end
-
-					DropdownOption.BackgroundTransparency = 1
-					DropdownOption.UIStroke.Transparency = 1
-					DropdownOption.Title.TextTransparency = 1
-
-					DropdownOption.Interact.ZIndex = 50
-					DropdownOption.Interact.MouseButton1Click:Connect(function()
-						if (DropdownSettings.Multi and not table.find(DropdownSettings.CurrentOption, Option)) or (not DropdownSettings.Multi and DropdownSettings.CurrentOption ~= Option) then
-							if DropdownSettings.Multi then
-								table.insert(DropdownSettings.CurrentOption, Option)
-								Dropdown.Selected.Text = table.concat(DropdownSettings.CurrentOption, ", ")
-							else
-								DropdownSettings.CurrentOption = Option
-								Dropdown.Selected.Text = DropdownSettings.CurrentOption
-							end
-							local Success, Response = pcall(function()
-								DropdownSettings.Callback(DropdownSettings.CurrentOption)
-							end)
-							if not Success then
-								TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
-								TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-								Dropdown.Title.Text = "Callback Error"
-								print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
-								wait(0.5)
-								Dropdown.Title.Text = DropdownSettings.Name
-								TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-								TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-							end
-							for _, droption in ipairs(Dropdown.List:GetChildren()) do
-								if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
-									TweenService:Create(droption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
-								end
-							end
-							TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-							TweenService:Create(DropdownOption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
-							-- Debounce = true
-							-- wait(0.2)
-							-- TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-							-- wait(0.1)
-							-- TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
-							-- for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
-							-- 	if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-							-- 		TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-							-- 		TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-							-- 		TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-							-- 	end
-							-- end
-							-- TweenService:Create(Dropdown.List, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
-							-- TweenService:Create(Dropdown.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
-							-- wait(0.35)
-							-- Dropdown.List.Visible = false
-							-- Debounce = false	
-							SaveConfiguration()
+				for _, droption in ipairs(Dropdown.List:GetChildren()) do
+					if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" then
+						if not table.find(DropdownSettings.CurrentOption, droption.Name) then
+							droption.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 						else
-							if DropdownSettings.Multi then
-								for i2,v2 in pairs(DropdownSettings.CurrentOption) do
-									if v2 == Option then
-										table.remove(DropdownSettings.CurrentOption, i2)
-									end
-								end
-								if #DropdownSettings.CurrentOption > 0 then
-									Dropdown.Selected.Text = table.concat(DropdownSettings.CurrentOption, ", ")
-								else
-									Dropdown.Selected.Text = "None"
-								end
-							else
-								DropdownSettings.CurrentOption = nil
-								Dropdown.Selected.Text = "None"
-							end
-
-							local Success, Response = pcall(function()
-								DropdownSettings.Callback(DropdownSettings.CurrentOption)
-							end)
-							if not Success then
-								TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
-								TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-								Dropdown.Title.Text = "Callback Error"
-								print("Rayfield | "..DropdownSettings.Name.." Callback Error " ..tostring(Response))
-								wait(0.5)
-								Dropdown.Title.Text = DropdownSettings.Name
-								TweenService:Create(Dropdown, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-								TweenService:Create(Dropdown.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-							end
-							for _, droption in ipairs(Dropdown.List:GetChildren()) do
-								if droption.ClassName == "Frame" and droption.Name ~= "Placeholder" and droption.Name ~= "Search" then
-									TweenService:Create(droption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
-								end
-							end
-							TweenService:Create(DropdownOption.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-							TweenService:Create(DropdownOption, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+							droption.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 						end
-					end)
+					end
 				end
-			end
-
-			function DropdownSettings:Visible(Visiblity)
-
-				if type(Visiblity) == "boolean" then
- 					Dropdown.Visible = Visiblity
-				end
-
-				return
+				--SaveConfiguration()
 			end
 
 			if Settings.ConfigurationSaving then
@@ -2088,262 +2106,8 @@ end
 			return DropdownSettings
 		end
 
-		-- List
-		function Tab:CreateList(ListSettings)
-			local NewRules = {}
-			local ListClone = Elements.Template.List:Clone()
-			if string.find(ListSettings.Name,"closed") then
-				ListClone.Name = "ListClone"
-			else
-				ListClone.Name = ListSettings.Name
-			end
-			ListClone.Title.Text = ListSettings.Name
-			if ListSettings.Icon ~= nil then
-				table.insert(RayfieldLibrary.DropdownIcons, ListClone.Icon)
-				ListClone.Title.Position = UDim2.fromOffset(152,21)
-				ListClone.Icon.Visible = true
-				ListClone.Icon.Image = ListSettings.Icon
-			end
-			ListClone.Visible = true
-			ListClone.Parent = TabPage
 
-			ListClone.Rules.Visible = false
 
-			ListClone.Total.Text = #ListSettings.Rules.." Rules"
-
-			ListClone.BackgroundTransparency = 1
-			ListClone.UIStroke.Transparency = 1
-			ListClone.Title.TextTransparency = 1
-			ListClone.Icon.ImageTransparency = 1
-
-			ListClone.Size = UDim2.new(1, -10, 0, 45)
-
-			TweenService:Create(ListClone, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-			TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-			TweenService:Create(ListClone.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
-			TweenService:Create(ListClone.Icon, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-
-			for _, ununusedoption in ipairs(ListClone.Rules:GetChildren()) do
-				if ununusedoption.ClassName == "Frame" and ununusedoption.Name ~= "Placeholder" and ununusedoption.Name ~= "Search" then
-					ununusedoption:Destroy()
-				end
-			end
-
-			ListClone.Toggle.Rotation = 180
-
-			ListClone.Interact.MouseButton1Click:Connect(function()
-				TweenService:Create(ListClone, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
-				TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-				wait(0.1)
-				TweenService:Create(ListClone, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-				TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-				if Debounce then return end
-				if ListClone.Rules.Visible then
-					Debounce = true
-					TweenService:Create(ListClone, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
-					for _, DropdownOpt in ipairs(ListClone.Rules:GetChildren()) do
-						if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-							TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-							TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-							if DropdownOpt:FindFirstChild("Title") then
-                                TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-                            else
-                                TweenService:Create(DropdownOpt.Search, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-                            end
-                            if DropdownOpt:FindFirstChild("Icon") then
-                                TweenService:Create(DropdownOpt.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-                            else
-                                TweenService:Create(DropdownOpt:FindFirstChild("Remove"), TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-                            end
-						end
-					end
-					TweenService:Create(ListClone.Rules, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
-					TweenService:Create(ListClone.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
-					wait(0.35)
-					ListClone.Rules.Visible = false
-					Debounce = false
-				else
-					TweenService:Create(ListClone, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10,0.353, 180)}):Play()
-					ListClone.Rules.Visible = true
-					TweenService:Create(ListClone.Rules, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 0.7}):Play()
-					TweenService:Create(ListClone.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 0}):Play()	
-					for _, DropdownOpt in ipairs(ListClone.Rules:GetChildren()) do
-						if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-							TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-							TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-							if DropdownOpt:FindFirstChild("Title") then
-                                TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-                            else
-                                TweenService:Create(DropdownOpt.Search, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-                            end
-                            if DropdownOpt:FindFirstChild("Icon") then
-                                TweenService:Create(DropdownOpt.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-                            else
-                                TweenService:Create(DropdownOpt:FindFirstChild("Remove"), TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 0.8}):Play()
-                            end
-						end
-					end
-				end
-			end)
-
-			ListClone.MouseEnter:Connect(function()
-				if not ListClone.Rules.Visible then
-					TweenService:Create(ListClone, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
-				end
-			end)
-
-			ListClone.MouseLeave:Connect(function()
-				TweenService:Create(ListClone, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-			end)
-
-			for i, Rule in ipairs(ListSettings.Rules) do
-				local DropdownOption = Elements.Template.List.Rules.Template:Clone()
-				DropdownOption.Name = i
-				DropdownOption.Title.Text = Rule
-				DropdownOption.Parent = ListClone.Rules
-				DropdownOption.Visible = true
-
-				DropdownOption.BackgroundTransparency = 1
-				DropdownOption.UIStroke.Transparency = 1
-				DropdownOption.Title.TextTransparency = 1
-                DropdownOption:FindFirstChild("Remove").ImageTransparency = 0.8
-
-				DropdownOption:FindFirstChild("Remove").MouseButton1Click:Connect(function()
-                    NewRules = {}
-					for i2,v2 in pairs(ListSettings.Rules) do
-						if Rule ~= v2 then
-							table.insert(NewRules, v2)
-						end
-					end
-					ListSettings.Rules = NewRules
-					ListClone.Total.Text = #NewRules.." Rules"
-
-					local Success, Response = pcall(function()
-						ListSettings.Callback(ListSettings.Rules)
-					end)
-
-					if not Success then
-						TweenService:Create(ListClone, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
-						TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-						ListClone.Title.Text = "Callback Error"
-						print("Rayfield | "..ListSettings.Name.." Callback Error " ..tostring(Response))
-						wait(0.5)
-						ListClone.Title.Text = ListSettings.Name
-						TweenService:Create(ListClone, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-						TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-					end
-                    DropdownOption:Destroy()
-					SaveConfiguration()
-				end)
-			end
-
-            ListClone.Rules.Search.Search.Changed:Connect(function()
-                if ListClone.Rules.Search.Search.Text == "" then
-                    for i,v in pairs(ListClone.Rules:GetChildren()) do
-                        if v:IsA("Frame") and v.Name ~= "Search" and v.Name ~= "Placeholder" then
-                            v.Visible = true
-                        end
-                    end
-                elseif ListClone.Rules.Search.Search.Text ~= "" then
-                    for i,v in pairs(ListClone.Rules:GetChildren()) do
-                        if v:IsA("Frame") and v.Name ~= "Search" and v.Name ~= "Placeholder" then
-                            if not string.find(v.Title.Text:lower(), ListClone.Rules.Search.Search.Text:lower()) then
-                                v.Visible = false
-                            end
-                        end
-                    end
-                end
-            end)
-
-			function ListSettings:UpdateRules(RulesReplacement)
-				TweenService:Create(ListClone, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
-				for _, DropdownOpt in ipairs(ListClone.Rules:GetChildren()) do
-					if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
-						TweenService:Create(DropdownOpt, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-						TweenService:Create(DropdownOpt.UIStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-						if DropdownOpt:FindFirstChild("Title") then
-							TweenService:Create(DropdownOpt.Title, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-						else
-							TweenService:Create(DropdownOpt.Search, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-						end
-						if DropdownOpt:FindFirstChild("Icon") then
-							TweenService:Create(DropdownOpt.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-						else
-							TweenService:Create(DropdownOpt:FindFirstChild("Remove"), TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-						end
-					end
-				end
-				TweenService:Create(ListClone.Rules, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {ScrollBarImageTransparency = 1}):Play()
-				TweenService:Create(ListClone.Toggle, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Rotation = 180}):Play()	
-				wait(0.35)
-				ListClone.Rules.Visible = false
-
-				ListSettings.Rules = RulesReplacement
-                ListClone.Total.Text = #ListSettings.Rules.." Rules"
-				for i,v in ipairs(ListClone.Rules:GetChildren()) do
-					if v.ClassName == "Frame" and v.Name ~= "Placeholder" and v.Name ~= "Search" then
-						v:Destroy()
-					end
-				end
-                for i, Rule in ipairs(ListSettings.Rules) do
-                    local DropdownOption = Elements.Template.List.Rules.Template:Clone()
-                    DropdownOption.Name = i
-                    DropdownOption.Title.Text = Rule
-                    DropdownOption.Parent = ListClone.Rules
-                    DropdownOption.Visible = true
-
-                    DropdownOption.BackgroundTransparency = 1
-                    DropdownOption.UIStroke.Transparency = 1
-                    DropdownOption.Title.TextTransparency = 1
-                    DropdownOption:FindFirstChild("Remove").ImageTransparency = 0.8
-
-                    DropdownOption:FindFirstChild("Remove").MouseButton1Click:Connect(function()
-						NewRules = {}
-						for i2,v2 in pairs(ListSettings.Rules) do
-							if Rule ~= v2 then
-								table.insert(NewRules, v2)
-							end
-						end
-						ListSettings.Rules = NewRules
-                        ListClone.Total.Text = #NewRules.." Rules"
-
-                        local Success, Response = pcall(function()
-                            ListSettings.Callback(ListSettings.Rules)
-                        end)
-
-                        if not Success then
-                            TweenService:Create(ListClone, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
-                            TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
-                            ListClone.Title.Text = "Callback Error"
-                            print("Rayfield | "..ListSettings.Name.." Callback Error " ..tostring(Response))
-                            wait(0.5)
-                            ListClone.Title.Text = ListSettings.Name
-                            TweenService:Create(ListClone, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
-                            TweenService:Create(ListClone.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
-                        end
-                        DropdownOption:Destroy()
-                        SaveConfiguration()
-                    end)
-                end
-			end
-
-			function ListSettings:Visible(Visiblity)
-
-				if type(Visiblity) == "boolean" then
- 					ListClone.Visible = Visiblity
-				end
-
-				return
-			end
-
-			if Settings.ConfigurationSaving then
-				if Settings.ConfigurationSaving.Enabled and ListSettings.Flag then
-					RayfieldLibrary.Flags[ListSettings.Flag] = ListSettings
-				end
-			end
-
-			return ListSettings
-		end
 		-- Keybind
 		function Tab:CreateKeybind(KeybindSettings)
 			local CheckingForKey = false
@@ -2375,7 +2139,7 @@ end
 				CheckingForKey = false
 				if Keybind.KeybindFrame.KeybindBox.Text == nil or "" then
 					Keybind.KeybindFrame.KeybindBox.Text = KeybindSettings.CurrentKeybind
-					SaveConfiguration()
+					--SaveConfiguration()
 				end
 			end)
 
@@ -2396,7 +2160,10 @@ end
 						Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeyNoEnum)
 						KeybindSettings.CurrentKeybind = tostring(NewKeyNoEnum)
 						Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
-						SaveConfiguration()
+                        if SaveDropDown then 
+						RayfieldLibrary:SaveConfiguration()
+                        RayfieldLibrary:SaveConfigurationName()
+                        end
 					end
 				elseif KeybindSettings.CurrentKeybind ~= nil and (input.KeyCode == Enum.KeyCode[KeybindSettings.CurrentKeybind] and not processed) then -- Test
 					local Held = true
@@ -2444,7 +2211,7 @@ end
 				Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeybind)
 				KeybindSettings.CurrentKeybind = tostring(NewKeybind)
 				Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and KeybindSettings.Flag then
@@ -2497,10 +2264,6 @@ end
 				TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 			end)
 
-            local Success, Response = pcall(function()
-                ToggleSettings.Callback(ToggleSettings.CurrentValue)
-            end)
-
 			Toggle.Interact.MouseButton1Click:Connect(function()
 				if ToggleSettings.CurrentValue then
 					ToggleSettings.CurrentValue = false
@@ -2546,7 +2309,8 @@ end
 					TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
 
-				SaveConfiguration()
+
+				--SaveConfiguration()
 			end)
 
 			function ToggleSettings:Set(NewToggleValue)
@@ -2592,16 +2356,7 @@ end
 					TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 					TweenService:Create(Toggle.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
-				SaveConfiguration()
-			end
-
-			function ToggleSettings:Visible(Visiblity)
-
-				if type(Visiblity) == "boolean" then
- 					Toggle.Visible = Visiblity
-				end
-
-				return
+				--SaveConfiguration()
 			end
 
 			if Settings.ConfigurationSaving then
@@ -2616,9 +2371,7 @@ end
 		-- Slider
 		function Tab:CreateSlider(SliderSettings)
 			local Dragging = false
-
 			local Slider = Elements.Template.Slider:Clone()
-
 			Slider.Name = SliderSettings.Name
 			Slider.Title.Text = SliderSettings.Name
 			Slider.Visible = true
@@ -2648,6 +2401,7 @@ end
 				Slider.Main.Information.Text = tostring(SliderSettings.CurrentValue) .. " " .. SliderSettings.Suffix
 			end
 
+
 			Slider.MouseEnter:Connect(function()
 				TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 			end)
@@ -2656,38 +2410,24 @@ end
 				TweenService:Create(Slider, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 			end)
 
-			local function StartDragging()
-				Dragging = true
-			end
-
-			local function StopDragging()
-				Dragging = false
-			end
-
 			Slider.Main.Interact.InputBegan:Connect(function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then 
-					StartDragging()
+				if Input.UserInputType == Enum.UserInputType.MouseButton1 then 
+					Dragging = true 
+				end 
+			end)
+			Slider.Main.Interact.InputEnded:Connect(function(Input) 
+				if Input.UserInputType == Enum.UserInputType.MouseButton1 then 
+					Dragging = false 
 				end 
 			end)
 
-			Slider.Main.Interact.InputEnded:Connect(function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then 
-					StopDragging()
-				end 
-			end)
-
-			local function UpdateSlider(Input)
+			Slider.Main.Interact.MouseButton1Down:Connect(function(X)
 				local Current = Slider.Main.Progress.AbsolutePosition.X + Slider.Main.Progress.AbsoluteSize.X
 				local Start = Current
-				local Location = Input.Position.X
+				local Location = X
 				local Loop; Loop = RunService.Stepped:Connect(function()
 					if Dragging then
-						if Input.UserInputType == Enum.UserInputType.Touch then
-							Location = Input.Position.X
-						else
-							Location = UserInputService:GetMouseLocation().X
-						end
-
+						Location = UserInputService:GetMouseLocation().X
 						Current = Current + 0.025 * (Location - Start)
 
 						if Location < Slider.Main.AbsolutePosition.X then
@@ -2733,19 +2473,13 @@ end
 							end
 
 							SliderSettings.CurrentValue = NewValue
-							SaveConfiguration()
+							--SaveConfiguration()
 						end
 					else
 						TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Location - Slider.Main.AbsolutePosition.X > 5 and Location - Slider.Main.AbsolutePosition.X or 5, 1, 0)}):Play()
 						Loop:Disconnect()
 					end
 				end)
-			end
-
-			Slider.Main.Interact.InputBegan:Connect(function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-					UpdateSlider(Input)
-				end
 			end)
 
 			function SliderSettings:Set(NewVal)
@@ -2765,16 +2499,8 @@ end
 					TweenService:Create(Slider.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 				end
 				SliderSettings.CurrentValue = NewVal
-				SaveConfiguration()
+				--SaveConfiguration()
 			end
-
-			function SliderSettings:Visible(Visibility)
-				if type(Visibility) == "boolean" then
-					Slider.Visible = Visibility
-				end
-				return
-			end
-
 			if Settings.ConfigurationSaving then
 				if Settings.ConfigurationSaving.Enabled and SliderSettings.Flag then
 					RayfieldLibrary.Flags[SliderSettings.Flag] = SliderSettings
@@ -2788,12 +2514,6 @@ end
 	end
 
 	Elements.Visible = true
-
-	wait(1.2)
-	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Thumbnail, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Shadow, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-	TweenService:Create(LoadingFrame.Quote, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 	wait(0.2)
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
@@ -2806,7 +2526,7 @@ end
 	Topbar.ChangeSize.ImageTransparency = 1
 	Topbar.Hide.ImageTransparency = 1
 
-	wait(0.8)
+	wait(0.5)
 	Topbar.Visible = true
 	TweenService:Create(Topbar, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
 	TweenService:Create(Topbar.CornerRepair, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
@@ -2882,16 +2602,25 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	end
 end
 
+function RayfieldLibrary:LoadConfigurationPath(Name)
+		pcall(function()
+			if isfile(ConfigurationFolder .. "/" .. tostring(Name).. ConfigurationExtension) then
+				LoadConfiguration(readfile(ConfigurationFolder .. "/" ..Name.. ConfigurationExtension))
+				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
+			end
+		end)
+end
+
 
 function RayfieldLibrary:LoadConfiguration()
-	if CEnabled then
 		pcall(function()
 			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
 				LoadConfiguration(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
 				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
 			end
 		end)
-	end
 end
+
+--task.delay(3.5, RayfieldLibrary.LoadConfiguration, RayfieldLibrary)
 
 return RayfieldLibrary
