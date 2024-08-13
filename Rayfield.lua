@@ -1,4 +1,4 @@
-local Release = "Beta 8"
+local Release = "Penis"
 local NotificationDuration = 6.5
 local RayfieldFolder = "Rayfield"
 local ConfigurationFolder = RayfieldFolder.."/Configurations"
@@ -2520,6 +2520,11 @@ function DropdownSettings:Replace(NewOption)
 	end
 
 	Elements.Visible = true
+	wait(1.2)
+	TweenService:Create(LoadingFrame.Title, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+	TweenService:Create(LoadingFrame.Thumbnail, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
+	TweenService:Create(LoadingFrame.Shadow, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
+	TweenService:Create(LoadingFrame.Quote, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
 	wait(0.2)
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 500, 0, 475)}):Play()
 	TweenService:Create(Main.Shadow.Image, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {ImageTransparency = 0.4}):Play()
