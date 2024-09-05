@@ -7,9 +7,9 @@ local LocalPlayer = game.Players.LocalPlayer
 local HRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 local Lighting = game:GetService("Lighting")
 
-local Destroy_WorkSpace = {"Map", "Border", "FlyBorder","CoreGui"}
+local Destroy_WorkSpace = {"Map", "Border", "FlyBorder"}
 local Move_Replicated_StorageItems = {"ALWAYS_RENDERING"}
-local Destroy_Game_Entities = {"Stats", "Chat", "Debris"}
+local Destroy_Game_Entities = {"Stats", "Chat", "Debris","CoreGui"}
 local Move__THINGS_RepStorage = {"Sounds", "RandomEvents", "Flags", "Hoverboards", "Booths", "ExclusiveEggs", "ExclusiveEggPets", "BalloonGifts", "Sprinklers", "Eggs", "ShinyRelics"}
 local function MoveRepStorage(item) if item then item.Parent = ReplicatedStorage end end
 
@@ -67,11 +67,11 @@ end
 pcall(function() workspace.__THINGS.__INSTANCE_CONTAINER.ServerOwned.Parent = game.ReplicatedStorage end)
 workspace.Gravity = 0
 
-for i, v in workspace:GetChildren() do
+for i, v in pairs(workspace:GetChildren()) do
     pcall(function()
-    if not (v.Name == "__THINGS" or v.Name == Player.Name)  then
-        pcall(function() v:Destroy() end)
-    end
+        if not (v.Name == "__THINGS" or v.Name == Player.Name)  then
+            pcall(function() v:Destroy() end)
+        end
     end)
 end
 
