@@ -80,7 +80,6 @@ for _, name in ipairs(Move__THINGS_RepStorage) do
 end
 
 pcall(function() workspace.__THINGS.__INSTANCE_CONTAINER.ServerOwned.Parent = game.ReplicatedStorage end)
-workspace.Gravity = 0
 
 for i, v in pairs(workspace:GetChildren()) do
     pcall(function()
