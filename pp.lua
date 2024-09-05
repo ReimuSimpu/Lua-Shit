@@ -9,7 +9,7 @@ local Lighting = game:GetService("Lighting")
 
 local Destroy_WorkSpace = {"Map", "Border", "FlyBorder"}
 local Move_Replicated_StorageItems = {"ALWAYS_RENDERING"}
-local Destroy_Game_Entities = {"Stats", "Chat", "Debris"}
+local Destroy_Game_Entities = {"Stats", "Chat", "Debris","CoreGui"}
 local Move__THINGS_RepStorage = {"Sounds", "RandomEvents", "Flags", "Hoverboards", "Booths", "ExclusiveEggs", "ExclusiveEggPets", "BalloonGifts", "Sprinklers", "Eggs", "ShinyRelics"}
 local function MoveRepStorage(item) if item then item.Parent = ReplicatedStorage end end
 
