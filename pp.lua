@@ -10,7 +10,7 @@ local Lighting = game:GetService("Lighting")
 local Destroy_WorkSpace = {"Map", "Border", "FlyBorder"}
 local Move_Replicated_StorageItems = {"ALWAYS_RENDERING"}
 local Destroy_Game_Entities = {"Stats", "Chat", "Debris"}
-local Move__THINGS_RepStorage = {"Sounds", "RandomEvents", "Flags", "Hoverboards", "Booths", "ExclusiveEggs", "ExclusiveEggPets", "BalloonGifts", "Sprinklers", "Eggs", "ShinyRelics"}
+local Move__THINGS_RepStorage = {"Breakables","Lootbags","Orbs","Pets","Sounds", "RandomEvents", "Flags", "Hoverboards", "Booths", "ExclusiveEggs", "ExclusiveEggPets", "BalloonGifts", "Sprinklers", "Eggs", "ShinyRelics"}
 local function MoveRepStorage(item) if item then item.Parent = ReplicatedStorage end end
 
 pcall(function()
@@ -49,22 +49,9 @@ pcall(function()
         end
     end)
     for _, v in pairs(workspace:GetDescendants()) do
-        pcall(function()
-            if v:IsA("BasePart") then
-                v.Transparency = 1
-            end
-            
-            if v:FindFirstChildOfClass("Mesh") then
-                v.Mesh:Destroy()
-            end
-            
-            if v:FindFirstChildOfClass("Texture") then
-                v.Texture:Destroy()
-            end
-        end)
+        pcall(function() v.Transparency = 1 v.TextureID = 0 v.MeshId = 0 end)
     end
 end)
-
 
 for _, name in ipairs(Move_Replicated_StorageItems) do
     pcall(function()
