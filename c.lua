@@ -43,6 +43,10 @@ pcall(function()
             child:Destroy()
         end
     end)
+    for _, v in pairs(workspace:GetDescendants()) do
+        pcall(function() v.Transparency = 1 end)
+    end
+    WorkspaceCon = workspace.DescendantAdded:Connect(function(v) task.wait() v.Transparency = 1 end)
 end)
 
 local function moveToReplicatedStorage(name)
