@@ -42,11 +42,7 @@ pcall(function()
             game.RunService.Heartbeat:Wait()
             child:Destroy()
         end
-        pcall(function() v.Transparency = 1 end)
     end)
-    for _, v in pairs(workspace:GetDescendants()) do
-        pcall(function() v.Transparency = 1 end)
-    end
 end)
 
 local function moveToReplicatedStorage(name)
