@@ -1,4 +1,5 @@
 --https://www.roblox.com/games/5307215810/Randomizer-NIGHTMARE-BEFORE-CHRISTMAS
+-- Made by LordHippo (.lordhippo)
 
 getgenv().Config = {
     ['Claim Airdrops'] = true,
