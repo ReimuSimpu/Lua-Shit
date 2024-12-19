@@ -131,8 +131,6 @@ local LoadConfiguration = function(Configuration)
 					if RayfieldLibrary.Flags[FlagName].CurrentValue or RayfieldLibrary.Flags[FlagName].CurrentKeybind or RayfieldLibrary.Flags[FlagName].CurrentOption or RayfieldLibrary.Flags[FlagName].Color ~= FlagValue then RayfieldLibrary.Flags[FlagName]:Set(FlagValue) end
 				end    
 			end)
-		else
-			RayfieldLibrary:Notify({Title = "Flag Error", Content = "Rayfield was unable to find '" .. FlagName.. "'' in the current script"})
 		end
 	end)
 end
@@ -286,7 +284,7 @@ local neon = (function()
 		end
 
 		local UpdateOrientation = function(fetchProps)
-			local zIndex = 1 - 0.05*frame.ZIndex
+			local zIndex = 1 - 0.05 * frame.ZIndex
 			local tl, br = frame.AbsolutePosition, frame.AbsolutePosition + frame.AbsoluteSize
 			local tr, bl = Vector2.new(br.x, tl.y), Vector2.new(tl.x, br.y)
 			do
@@ -367,147 +365,8 @@ local neon = (function()
 	return module
 end)()
 
-function RayfieldLibrary:Notify(NotificationSettings)
-	task.spawn(function()
-		local ActionCompleted = true
-		local Notification = Notifications.Template:Clone()
-		Notification.Parent = Notifications
-		Notification.Name = NotificationSettings.Title or "Unknown Title"
-		Notification.Visible = true
-
-		local blurlight = nil
-		if not getgenv().SecureMode then
-			blurlight = Instance.new("DepthOfFieldEffect",game:GetService("Lighting"))
-			blurlight.Enabled = true
-			blurlight.FarIntensity = 0
-			blurlight.FocusDistance = 51.6
-			blurlight.InFocusRadius = 50
-			blurlight.NearIntensity = 1
-			game:GetService("Debris"):AddItem(script,0)
-		end
-
-		Notification.Actions.Template.Visible = false
-
-		if NotificationSettings.Actions then
-			for _, Action in pairs(NotificationSettings.Actions) do
-				ActionCompleted = false
-				local NewAction = Notification.Actions.Template:Clone()
-				NewAction.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-				NewAction.Name = Action.Name
-				NewAction.Visible = true
-				NewAction.Parent = Notification.Actions
-				NewAction.Text = Action.Name
-				NewAction.BackgroundTransparency = 1
-				NewAction.TextTransparency = 1
-				NewAction.Size = UDim2.new(0, NewAction.TextBounds.X + 27, 0, 36)
-
-				NewAction.MouseButton1Click:Connect(function()
-					local Success, Response = pcall(Action.Callback)
-					if not Success then
-						print("Rayfield | Action: " .. Action.Name .. " Callback Error " ..tostring(Response))
-					end
-					ActionCompleted = true
-				end)
-			end
-		end
-		Notification.BackgroundColor3 = SelectedTheme.Background
-		Notification.Title.Text = NotificationSettings.Title or "Unknown"
-		Notification.Title.TextTransparency = 1
-		Notification.Title.TextColor3 = SelectedTheme.TextColor
-		Notification.Description.Text = NotificationSettings.Content or "Unknown"
-		Notification.Description.TextTransparency = 1
-		Notification.Description.TextColor3 = SelectedTheme.TextColor
-		Notification.Icon.ImageColor3 = SelectedTheme.TextColor
-		if NotificationSettings.Image then
-			Notification.Icon.Image = "rbxassetid://" .. tostring(NotificationSettings.Image) 
-		else
-			Notification.Icon.Image = "rbxassetid://3944680095"
-		end
-
-		Notification.Icon.ImageTransparency = 1
-
-		Notification.Parent = Notifications
-		Notification.Size = UDim2.new(0, 260, 0, 80)
-		Notification.BackgroundTransparency = 1
-
-		TweenService:Create(Notification, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 295, 0, 91)}):Play()
-		TweenService:Create(Notification, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.1}):Play()
-		Notification:TweenPosition(UDim2.new(0.5,0,0.915,0),'Out','Quint',0.8,true)
-
-		task.wait(0.3)
-		TweenService:Create(Notification.Icon, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {ImageTransparency = 0}):Play()
-		TweenService:Create(Notification.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-		TweenService:Create(Notification.Description, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.2}):Play()
-		task.wait(0.2)
-
-		if getgenv().SecureMode == nil then
-			TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.4}):Play()
-		else
-			if not getgenv().SecureMode then
-				TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.4}):Play()
-			else 
-				TweenService:Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-			end
-		end
-
-		if Rayfield.Name == "Rayfield" then
-			neon:BindFrame(Notification.BlurModule, {
-				Transparency = 0.98;
-				BrickColor = BrickColor.new("Institutional white");
-			})
-		end
-
-		if not NotificationSettings.Actions then
-			task.wait(NotificationSettings.Duration or 6.5 - 0.5)
-		else
-			task.wait(0.8)
-			TweenService:Create(Notification, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 295, 0, 132)}):Play()
-			task.wait(0.3)
-			for _, Action in ipairs(Notification.Actions:GetChildren()) do
-				if Action.ClassName == "TextButton" and Action.Name ~= "Template" then
-					TweenService:Create(Action, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.2}):Play()
-					TweenService:Create(Action, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-					task.wait(0.05)
-				end
-			end
-		end
-
-		repeat task.wait(0.001) until ActionCompleted
-
-		for _, Action in ipairs(Notification.Actions:GetChildren()) do
-			if Action.ClassName == "TextButton" and Action.Name ~= "Template" then
-				TweenService:Create(Action, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-				TweenService:Create(Action, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-			end
-		end
-
-		TweenService:Create(Notification.Title, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Position = UDim2.new(0.47, 0,0.234, 0)}):Play()
-		TweenService:Create(Notification.Description, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {Position = UDim2.new(0.528, 0,0.637, 0)}):Play()
-		TweenService:Create(Notification, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 280, 0, 83)}):Play()
-		TweenService:Create(Notification.Icon, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {ImageTransparency = 1}):Play()
-		TweenService:Create(Notification, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {BackgroundTransparency = 0.6}):Play()
-
-		task.wait(0.3)
-		TweenService:Create(Notification.Title, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.4}):Play()
-		TweenService:Create(Notification.Description, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.5}):Play()
-		task.wait(0.4)
-		TweenService:Create(Notification, TweenInfo.new(0.9, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 260, 0, 0)}):Play()
-		TweenService:Create(Notification, TweenInfo.new(0.8, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-		TweenService:Create(Notification.Title, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-		TweenService:Create(Notification.Description, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
-		task.wait(0.2)
-		if not getgenv().SecureMode then
-			neon:UnbindFrame(Notification.BlurModule)
-			blurlight:Destroy()
-		end
-		task.wait(0.9)
-		Notification:Destroy()
-	end)
-end
-
 Hide = function()
 	Debounce = true
-	RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping RightShift", Duration = 7})
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 400)}):Play()
 	TweenService:Create(Main.Topbar, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 470, 0, 45)}):Play()
 	TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
@@ -2555,7 +2414,6 @@ function RayfieldLibrary:LoadConfiguration()
 		pcall(function()
 			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
 				LoadConfiguration(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
-				RayfieldLibrary:Notify({Title = "Configuration Loaded", Content = "The configuration file for this script has been loaded from a previous session"})
 			end
 		end)
 	end
