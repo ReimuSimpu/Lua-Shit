@@ -108,12 +108,8 @@ local RayfieldLibrary = {
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
 		QuoteColors = {
-			Color3.fromRGB(255, 75, 198), -- Pink
-			Color3.fromRGB(21, 255, 150), -- Green Blue
 			Color3.fromRGB(6, 189, 255), -- Light Blue
 			Color3.fromRGB(29, 101, 255), -- Dark Blue
-			Color3.fromRGB(64, 216, 18), -- Green
-			Color3.fromRGB(216, 200, 21), -- Yellow
 		},
 	},
 	DropdownIcons = {}
