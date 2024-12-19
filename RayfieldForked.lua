@@ -1,8 +1,17 @@
---[[
-Rayfield Interface Suite
-by Sirius
-shlex | Designing + Programming
-iRay  | Programming
+--[[ how to run
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/ReimuSimpu/Lua-Shit/refs/heads/main/RayfieldForked.lua'))()
+local Rayfield = Library:CreateWindow({
+    ['LoadingTitle'] = "",
+    ['Name'] = "",
+    ['Quote'] = "",
+    ['Image'] = 123454,
+    ['Theme'] = "Default",
+    ['ConfigurationSaving'] = {
+        ['Enabled'] = true,
+        ['FolderName'] = "",
+        ['FileName'] = ""
+    },
+})
 ]]
 
 while not game:IsLoaded() do
