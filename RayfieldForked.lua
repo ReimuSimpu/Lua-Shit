@@ -70,7 +70,6 @@ local CEnabled = false
 local Minimised = false
 local Hidden = false
 local Debounce = false
-local Notifications = Rayfield.Notifications
 local SelectedTheme = RayfieldLibrary.Theme
 
 local AddDraggingFunctionality = function(DragPoint, Main)
@@ -655,8 +654,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 	end
 
-	Notifications.Template.Visible = false
-	Notifications.Visible = true
 	Rayfield.Enabled = true
 	task.wait(0.5)
 	TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
