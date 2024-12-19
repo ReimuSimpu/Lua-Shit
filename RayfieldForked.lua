@@ -276,7 +276,7 @@ local neon = (function()
 
 		local parents = {}
 		do
-			local add = function(child)
+			local function = add(child)
 				if child:IsA'GuiObject' then
 					parents[#parents + 1] = child
 					add(child.Parent)
