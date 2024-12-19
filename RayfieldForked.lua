@@ -263,7 +263,7 @@ local neon = (function()
 		end
 	end
 
-	module:BindFrame = function(frame, properties)
+	function module:BindFrame(frame, properties)
 		if RootParent == nil then return end
 		if binds[frame] then
 			return binds[frame].parts
@@ -333,7 +333,7 @@ local neon = (function()
 		return binds[frame].parts
 	end
 
-	module:Modify = function(frame, properties)
+	function module:Modify(frame, properties)
 		local parts = module:GetBoundParts(frame)
 		if parts then
 			for propName, propValue in pairs(properties) do
@@ -344,7 +344,7 @@ local neon = (function()
 		end
 	end
 
-	module:UnbindFrame = function(frame)
+	function module:UnbindFrame(frame)
 		if RootParent == nil then return end
 		local cb = binds[frame]
 		if cb then
@@ -356,18 +356,18 @@ local neon = (function()
 		end
 	end
 
-	module:HasBinding = function(frame)
+	function module:HasBinding(frame)
 		return binds[frame] ~= nil
 	end
 
-	module:GetBoundParts = function(frame)
+	function module:GetBoundParts(frame)
 		return binds[frame] and binds[frame].parts
 	end
 
 	return module
 end)()
 
-RayfieldLibrary:Notify = function(NotificationSettings)
+function RayfieldLibrary:Notify(NotificationSettings)
 	task.spawn(function()
 		local ActionCompleted = true
 		local Notification = Notifications.Template:Clone()
@@ -740,7 +740,7 @@ Minimise = function()
 end
 
 local GameDetails = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-RayfieldLibrary:CreateWindow = function(Settings)
+function RayfieldLibrary:CreateWindow(Settings)
 	local Passthrough = false
 	Topbar.Title.Text = Settings.Name
 	Main.Size = UDim2.new(0, 286, 0, 260)
@@ -818,7 +818,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 
 	local FirstTab = false
 	local Window = {}
-	Window:CreateTab = function(Name, Image)
+	function Window:CreateTab(Name, Image)
 		local SDone = false
 		local TabButton = TabList.Template:Clone()
 		TabButton.Name = Name
@@ -930,7 +930,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 
 		local Tab = {}
 
-		Tab:CreateButton = function(ButtonSettings)
+		function Tab:CreateButton(ButtonSettings)
 			local ButtonValue = {}
 
 			local Button = Elements.Template.Button:Clone()
@@ -983,12 +983,12 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.9}):Play()
 			end)
 
-			ButtonValue:Set = function(NewButton)
+			function ButtonValue:Set(NewButton)
 				Button.Title.Text = NewButton
 				Button.Name = NewButton
 			end
 
-			ButtonValue:Visible = function(Visiblity)
+			function ButtonValue:Visible(Visiblity)
 				if type(Visiblity) == "boolean" then
  					Button.Visible = Visiblity
 				end
@@ -997,7 +997,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return ButtonValue
 		end
 
-		Tab:CreateColorPicker = function(ColorPickerSettings)
+		function Tab:CreateColorPicker(ColorPickerSettings)
 			ColorPickerSettings.Type = "ColorPicker"
 			local ColorPicker = Elements.Template.ColorPicker:Clone()
 			local Background = ColorPicker.CPBackground
@@ -1188,7 +1188,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				end
 			end
 
-			ColorPickerSettings:Set = function(RGBColor)
+			function ColorPickerSettings:Set(RGBColor)
 				ColorPickerSettings.Color = RGBColor
 				h,s,v = ColorPickerSettings.Color:ToHSV()
 				color = Color3.fromHSV(h,s,v)
@@ -1198,8 +1198,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return ColorPickerSettings
 		end
 
-		Tab:CreateSection = function(SectionName)
-
+		function Tab:CreateSection(SectionName)
 			local SectionValue = {}
 
 			if SDone then
@@ -1216,7 +1215,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			Section.Title.TextTransparency = 1
 			TweenService:Create(Section.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
 
-			SectionValue:Set = function(NewSection)
+			function SectionValue:Set(NewSection)
 				Section.Title.Text = NewSection
 			end
 
@@ -1225,7 +1224,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return SectionValue
 		end
 
-		Tab:CreateLabel = function(LabelText)
+		function Tab:CreateLabel(LabelText)
 			local LabelValue = {}
 
 			local Label = Elements.Template.Label:Clone()
@@ -1244,14 +1243,14 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			TweenService:Create(Label.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 			TweenService:Create(Label.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
-			LabelValue:Set = function(NewLabel)
+			function LabelValue:Set(NewLabel)
 				Label.Title.Text = NewLabel
 			end
 
 			return LabelValue
 		end
 
-		Tab:CreateParagraph = function(ParagraphSettings)
+		function Tab:CreateParagraph(ParagraphSettings)
 			local ParagraphValue = {}
 
 			local Paragraph = Elements.Template.Paragraph:Clone()
@@ -1285,7 +1284,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			TweenService:Create(Paragraph.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 			TweenService:Create(Paragraph.Content, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
 
-			ParagraphValue:Set = function(NewParagraphSettings)
+			function ParagraphValue:Set(NewParagraphSettings)
 				Paragraph.Title.Text = NewParagraphSettings.Title
 				Paragraph.Content.Text = NewParagraphSettings.Content .. "\n"
 
@@ -1305,7 +1304,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return ParagraphValue
 		end
 
-		Tab:CreateInput = function(InputSettings)
+		function Tab:CreateInput(InputSettings)
 			local Input = Elements.Template.Input:Clone()
 			Input.Name = InputSettings.Name
 			Input.Title.Text = InputSettings.Name
@@ -1365,7 +1364,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			end)
 		end
 
-		Tab:CreateDropdown = function(DropdownSettings)
+		function Tab:CreateDropdown(DropdownSettings)
 			local Dropdown = Elements.Template.Dropdown:Clone()
 			if string.find(DropdownSettings.Name,"closed") then
 				Dropdown.Name = "Dropdown"
@@ -1607,7 +1606,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
                 end
             end)
 
-			DropdownSettings:Set = function(NewOption)
+			function DropdownSettings:Set(NewOption)
 				if DropdownSettings.Multi then
 					Dropdown.Selected.Text = table.concat(NewOption, ", ")
 				else
@@ -1639,7 +1638,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				end
 			end
 
-			DropdownSettings:UpdateOptions = function(NewOptions)
+			function DropdownSettings:UpdateOptions(NewOptions)
 				TweenService:Create(Dropdown, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 				for _, DropdownOpt in ipairs(Dropdown.List:GetChildren()) do
 					if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
@@ -1761,7 +1760,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				end
 			end
 
-			DropdownSettings:Visible = function(Visiblity)
+			function DropdownSettings:Visible(Visiblity)
 				if type(Visiblity) == "boolean" then
  					Dropdown.Visible = Visiblity
 				end
@@ -1776,7 +1775,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return DropdownSettings
 		end
 
-		Tab:CreateList = function(ListSettings)
+		function Tab:CreateList(ListSettings)
 			local NewRules = {}
 			local ListClone = Elements.Template.List:Clone()
 			if string.find(ListSettings.Name,"closed") then
@@ -1942,7 +1941,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
                 end
             end)
 
-			ListSettings:UpdateRules = function(RulesReplacement)
+			function ListSettings:UpdateRules(RulesReplacement)
 				TweenService:Create(ListClone, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(1, -10, 0, 45)}):Play()
 				for _, DropdownOpt in ipairs(ListClone.Rules:GetChildren()) do
 					if DropdownOpt.ClassName == "Frame" and DropdownOpt.Name ~= "Placeholder" then
@@ -2014,7 +2013,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
                 end
 			end
 
-			ListSettings:Visible = function(Visiblity)
+			function ListSettings:Visible(Visiblity)
 				if type(Visiblity) == "boolean" then
  					ListClone.Visible = Visiblity
 				end
@@ -2029,7 +2028,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 
 			return ListSettings
 		end
-		Tab:CreateKeybind = function(KeybindSettings)
+		function Tab:CreateKeybind(KeybindSettings)
 			local CheckingForKey = false
 			local Keybind = Elements.Template.Keybind:Clone()
 			Keybind.Name = KeybindSettings.Name
@@ -2124,7 +2123,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				TweenService:Create(Keybind.KeybindFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Keybind.KeybindFrame.KeybindBox.TextBounds.X + 24, 0, 30)}):Play()
 			end)
 
-			KeybindSettings:Set = function(NewKeybind)
+			function KeybindSettings:Set(NewKeybind)
 				Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeybind)
 				KeybindSettings.CurrentKeybind = tostring(NewKeybind)
 				Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
@@ -2138,7 +2137,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return KeybindSettings
 		end
 
-		Tab:CreateToggle = function(ToggleSettings)
+		function Tab:CreateToggle(ToggleSettings)
 			local ToggleValue = {}
 
 			local Toggle = Elements.Template.Toggle:Clone()
@@ -2228,7 +2227,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				SaveConfiguration()
 			end)
 
-			ToggleSettings:Set = function(NewToggleValue)
+			function ToggleSettings:Set(NewToggleValue)
 				if NewToggleValue then
 					ToggleSettings.CurrentValue = true
 					TweenService:Create(Toggle, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
@@ -2274,7 +2273,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				SaveConfiguration()
 			end
 
-			ToggleSettings:Visible = function(Visiblity)
+			function ToggleSettings:Visible(Visiblity)
 				if type(Visiblity) == "boolean" then
  					Toggle.Visible = Visiblity
 				end
@@ -2289,7 +2288,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 			return ToggleSettings
 		end
 
-		Tab:CreateSlider = function(SliderSettings)
+		function Tab:CreateSlider(SliderSettings)
 			local Dragging = false
 
 			local Slider = Elements.Template.Slider:Clone()
@@ -2419,7 +2418,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				end
 			end)
 
-			SliderSettings:Set = function(NewVal)
+			function SliderSettings:Set(NewVal)
 				TweenService:Create(Slider.Main.Progress, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, Slider.Main.AbsoluteSize.X * ((NewVal + SliderSettings.Range[1]) / (SliderSettings.Range[2] - SliderSettings.Range[1])) > 5 and Slider.Main.AbsoluteSize.X * (NewVal / (SliderSettings.Range[2] - SliderSettings.Range[1])) or 5, 1, 0)}):Play()
 				Slider.Main.Information.Text = tostring(NewVal) .. " " .. SliderSettings.Suffix
 				local Success, Response = pcall(function()
@@ -2439,7 +2438,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 				SaveConfiguration()
 			end
 
-			SliderSettings:Visible = function(Visibility)
+			function SliderSettings:Visible(Visibility)
 				if type(Visibility) == "boolean" then
 					Slider.Visible = Visibility
 				end
@@ -2495,7 +2494,7 @@ RayfieldLibrary:CreateWindow = function(Settings)
 	return Window
 end
 
-RayfieldLibrary = function:Destroy()
+function RayfieldLibrary:Destroy()
 	Rayfield:Destroy()
 end
 
@@ -2551,7 +2550,7 @@ for _, TopbarButton in ipairs(Topbar:GetChildren()) do
 	end
 end
 
-RayfieldLibrary:LoadConfiguration = function()
+function RayfieldLibrary:LoadConfiguration()
 	if CEnabled then
 		pcall(function()
 			if isfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension) then
