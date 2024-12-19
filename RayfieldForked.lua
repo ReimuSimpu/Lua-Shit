@@ -6,6 +6,7 @@ local Rayfield = Library:CreateWindow({
     ['Quote'] = "",
     ['Image'] = 123454,
     ['Theme'] = "Default",
+	['QuoteColors'] = { Color3.fromRGB(255, 0, 255), Color3.fromRGB(29, 101, 255) }
     ['ConfigurationSaving'] = {
         ['Enabled'] = true,
         ['FolderName'] = "",
@@ -23,8 +24,6 @@ local NotificationDuration = 6.5
 local RayfieldFolder = "Rayfield"
 local ConfigurationFolder = RayfieldFolder.."/Configurations"
 local ConfigurationExtension = ".json"
-
-
 
 local RayfieldLibrary = {
 	Flags = {},
@@ -68,11 +67,6 @@ local RayfieldLibrary = {
 			InputStroke = Color3.fromRGB(65, 65, 65),
 			PlaceholderColor = Color3.fromRGB(178, 178, 178)
 		},
-		QuoteColors = {
-			Color3.fromRGB(255, 75, 198), -- Pink
-			Color3.fromRGB(29, 101, 255), -- Dark Blue
-		},
-		
 	},
 	DropdownIcons = {}
 }
@@ -889,7 +883,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 	LoadingFrame.Quote.Text = Settings.Quote
 	LoadingFrame.Quote.UIGradient.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, RayfieldLibrary.Theme.QuoteColors[math.random(1, #RayfieldLibrary.Theme.QuoteColors)]),
+		ColorSequenceKeypoint.new(0, Settings.QuoteColors[math.random(1, #Settings.QuoteColors)]),
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
 	}
 
