@@ -44,13 +44,13 @@ local TextService = game:GetService("TextService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local Rayfield = game:GetObjects("rbxassetid://12531161931")[1]
 
-for _, Interface in ipairs(PlayerGui:GetChildren()) do
+for _, Interface in ipairs(CoreGui:GetChildren()) do
 	if Interface.Name == Rayfield.Name then
 		Interface:Destroy()
 	end
 end
 
-Rayfield.Parent = PlayerGui
+Rayfield.Parent = CoreGui
 
 local Camera = workspace.CurrentCamera
 local Main = Rayfield.Main
