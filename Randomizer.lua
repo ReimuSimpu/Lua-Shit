@@ -1,4 +1,5 @@
---https://www.roblox.com/games/5307215810/Randomizer-NIGHTMARE-BEFORE-CHRISTMAS
+-- https://www.roblox.com/games/5307215810/Randomizer-NIGHTMARE-BEFORE-CHRISTMAS
+-- https://www.youtube.com/watch?v=sw6PRvLwfBA
 -- Made by LordHippo (.lordhippo)
 
 local LocalPlayer = game.Players.LocalPlayer
