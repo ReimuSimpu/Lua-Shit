@@ -5,6 +5,6 @@ for _, v in getconnections(LocalPlayer.Idled) do
 end 
 
 LocalPlayer.Idled:Connect(function() 
-    game.VirtualUser:CaptureController()
-    game.VirtualUser:ClickButton2(Vector2.new()) 
+    game:GetService("VirtualUser"):CaptureController()
+    game:GetService("VirtualUser"):ClickButton2(Vector2.new()) 
 end)
