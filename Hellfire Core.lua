@@ -16,9 +16,8 @@ local GetItem = function(Class, Id)
     end
 end
 
-while true do
+while task.wait() do
     local CoreUID, CoreInfo = GetItem("Misc", "Hellfire Core")
     if not CoreUID then break end
     Network.Invoke("HellFireCore_SpawnRequest", CoreUID)
-    task.wait()
 end
