@@ -52,7 +52,7 @@ end
 local SendWebhook = function(Id, pt, sh)
     local Img = string.format("https://biggamesapi.io/image/%s", GetAsset(Id, pt))
     local Version = pt == 1 and "Golden " or pt == 2 and "Rainbow " or ""
-    local Title = LocalPlayer.Name .. " Obtained a " .. Version .. (sh and "Shiny " or "") .. Id
+    local Title = string.format("||%s|| Obtained a %s%s%s", LocalPlayer.Name, Version, sh and "Shiny " or "", Id)
 
     local Exist = GetStats(ExistCmds, "Pet", { id = Id, pt = pt, sh = sh, tn = nil })
     local Rap = GetStats(RapCmds, "Pet", { id = Id, pt = pt, sh = sh, tn = nil })
