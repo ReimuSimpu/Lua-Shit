@@ -3,7 +3,17 @@
 
 getgenv().AutoMail = {
     ['Items'] = {
-        ['Hype Egg'] = { Class = "Lootbox", Amount = 1 },
+        ['Tech Key'] = { Class = "Misc", Amount = 1 },
+        ['Void Key'] = { Class = "Misc", Amount = 1 },
+        ['Crystal Key'] = { Class = "Misc", Amount = 1 },
+        ['Crystal Key Upper Half'] = { Class = "Misc", Amount = 1 },
+        ['Crystal Key Lower Half'] = { Class = "Misc", Amount = 1 },
+        ['Secret Key Upper Half'] = { Class = "Misc", Amount = 1 },
+        ['Secret Key Lower Half'] = { Class = "Misc", Amount = 1 },
+        ['Tech Key Upper Half'] = { Class = "Misc", Amount = 1 },
+        ['Tech Key Lower Half'] = { Class = "Misc", Amount = 1 },
+        ['Void Key Upper Half'] = { Class = "Misc", Amount = 1 },
+        ['Void Key Lower Half'] = { Class =  "Misc", Amount = 1 },
     },
     ['Loop Interval'] = 60,
     ['Users'] = {"DOLLRVPED"}, -- Does random of one
