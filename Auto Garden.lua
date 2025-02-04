@@ -11,9 +11,11 @@ OrbCmds.CombineDelay, OrbCmds.CollectDistance, OrbCmds.DefaultPickupDistance, Or
 while task.wait() do
     if workspace.__THINGS.__INSTANCE_CONTAINER.Active:FindFirstChild("FlowerGarden") then
         for i = 1, 10 do
-            Network.Invoke("Instancing_InvokeCustomFromClient", "FlowerGarden", "PlantSeed", i, "Diamond")
-            Network.Invoke("Instancing_InvokeCustomFromClient", "FlowerGarden", "InstaGrowSeed", i)
-            Network.Invoke("Instancing_InvokeCustomFromClient", "FlowerGarden", "ClaimPlant", i)
+            task.spawn(function()
+                Network.Invoke("Instancing_InvokeCustomFromClient", "FlowerGarden", "PlantSeed", i, "Diamond")
+                Network.Invoke("Instancing_InvokeCustomFromClient", "FlowerGarden", "InstaGrowSeed", i)
+                Network.Invoke("Instancing_InvokeCustomFromClient", "FlowerGarden", "ClaimPlant", i)
+            end)
             task.wait()
         end
     else
