@@ -1,6 +1,6 @@
-local Directory = require(game.ReplicatedStorage.Library.Directory)
-
 local ChangeItem = function(Class, FromId, ToId)
+    local Directory = require(game.ReplicatedStorage.Library.Directory)
+
     local Dir = Directory[Class]
     if not Dir then 
         return nil, "Invalid Class: " .. Class
