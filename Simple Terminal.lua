@@ -4,14 +4,14 @@
 getgenv().HippoSniper = {
     ["Items"] = {
         ['Misc'] = {
-            ['Secret Key'] = { Price = 15000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = true },
-            ['Seed Bag'] = { Price = 2500, Terminal = true }
+            ['Secret Key'] = { Price = 15000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = false },
+            ['Seed Bag'] = { Price = 2500, Terminal = false }
         },
         ['Consumable'] = {
-            ['Tower Luck Booster'] = { Price = 1, pt = nil, sh = nil, tn = 1, Limit = 1000000, Terminal = true },
+            ['Tower Luck Booster'] = { Price = 800000, pt = nil, sh = nil, tn = 1, Limit = 1000000, Terminal = true },
         },
     },
-    ['Url'] = "https://discord.com/api/webhooks/",
+    ['Url'] = "",
 }
 
 repeat task.wait() until game:IsLoaded()
@@ -29,11 +29,12 @@ local SpecialClassCases, DirClassesTable = {Lootbox = "es", Box = "es", Misc = "
 for Class, _ in pairs(require(Library.Items.Types).Types) do DirClassesTable[Class] = SpecialClassCases[Class] or Class .. "s" end
 
 local FormatInt = function(int)
-    local index, Suffix = 1, {"", "k", "M", "B", "T"}
+    local index, Suffix = 1, {"", "K", "M", "B", "T"}
     while int >= 1000 and index < #Suffix do
-        int, index = int / 1000, index + 1
+        int = int / 1000
+        index = index + 1
     end
-    return string.format(int < 1000 and "%d" or "%.2f%s", int, Suffix[index])
+    return string.format(index == 1 and "%d" or "%.2f%s", int, Suffix[index])
 end
 
 local GetItem = function(Class, Id)
@@ -44,8 +45,22 @@ local GetItem = function(Class, Id)
 end
 
 local GetAssetId = function(Class, Info)
-    local ItemTable = require(Library.Directory)[Class][Info.id]
-    return Info.tn and unpack(getupvalues(ItemTable.Icon))[Info.tn] or ItemTable.Icon or ItemTable.icon or ItemTable.thumbnail
+    local Directory = require(Library.Directory)
+    local ItemTable = Directory[Class][Info.id]
+
+    local Icon = nil
+
+    if Info.tn then
+        if ItemTable.Icon and type(ItemTable.Icon) == "function" then
+            Icon = getupvalues(ItemTable.Icon)[Info.tn]
+        elseif ItemTable.Tiers and ItemTable.Tiers[1] and ItemTable.Tiers[1].Effect then
+            local EffectType = ItemTable.Tiers[1].Effect.Type
+            Icon = EffectType and EffectType.Tiers and EffectType.Tiers[Info.tn].Icon
+        end        
+    end
+
+    Icon = Icon or ItemTable.Icon or ItemTable.icon or ItemTable.thumbnail or "rbxassetid://0"
+    return Icon
 end
 
 local GetRap = function(Class, ItemTable)
@@ -122,17 +137,28 @@ local CheckAllListings = function()
     end
 end
 
+
 CheckAllListings()
 
 while task.wait() do
     local TerminalItems, Classes = {}, {}
 
-    for Name, _ in pairs(HippoSniper['Items']) do table.insert(Classes, Name) end
+    for ClassName, _ in pairs(HippoSniper['Items']) do
+        table.insert(Classes, ClassName)
+    end
 
     local RandomClass = Classes[math.random(#Classes)]
     local ClassItems = HippoSniper['Items'][RandomClass]
 
-    for ItemId, ItemInfo in pairs(ClassItems) do if ItemInfo.Terminal then table.insert(TerminalItems, ItemId) end end
+    for ItemId, ItemInfo in pairs(ClassItems) do
+        if ItemInfo.Terminal then
+            table.insert(TerminalItems, ItemId)
+        end
+    end
+
+    if #TerminalItems == 0 then
+        continue
+    end
 
     local RandomId = TerminalItems[math.random(#TerminalItems)]
     local ItemInfo = ClassItems[RandomId]
@@ -144,3 +170,4 @@ while task.wait() do
         game:GetService("TeleportService"):TeleportToPlaceInstance(QueryResults.place_id, QueryResults.job_id, game.Players.LocalPlayer, nil, {TargetBoothId = QueryResults.booth, IsTerminalTeleport = true, TerminalStackKey = StackKey, TerminalClassName = RandomClass})
     end
 end
+
