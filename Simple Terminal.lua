@@ -25,6 +25,12 @@ local RapCmds = require(Client.DevRAPCmds)
 local Network = require(Client.Network)
 local SaveMod = require(Client.Save)
 
+if game.PlaceId == 8737899170 or game.PlaceId == 16498369169 then
+    while true do
+        Network.Invoke("Travel to Trading Plaza") task.wait(1)
+    end
+end
+
 local SpecialClassCases, DirClassesTable = {Lootbox = "es", Box = "es", Misc = "MiscItems"}, {}
 for Class, _ in pairs(require(Library.Items.Types).Types) do DirClassesTable[Class] = SpecialClassCases[Class] or Class .. "s" end
 
@@ -170,4 +176,3 @@ while task.wait() do
         game:GetService("TeleportService"):TeleportToPlaceInstance(QueryResults.place_id, QueryResults.job_id, game.Players.LocalPlayer, nil, {TargetBoothId = QueryResults.booth, IsTerminalTeleport = true, TerminalStackKey = StackKey, TerminalClassName = RandomClass})
     end
 end
-
