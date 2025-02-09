@@ -1,3 +1,6 @@
+-- U may share it to others idc but dont resale ( the idiots on pira )
+-- discord.gg/fnxh8zUmTx
+
 getgenv().HippoSniper = {
     ["Items"] = {
         ['Misc'] = {
