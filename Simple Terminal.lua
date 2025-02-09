@@ -117,8 +117,6 @@ local ValidItem = function(Class, Cost, Info)
     return 0
 end
 
-
-
 local CheckAllListings = function()
     local BoothFrontend = getsenv(LocalPlayer.PlayerScripts.Scripts.Game["Trading Plaza"]["Booths Frontend"])
     for _, Player in ipairs(game.Players:GetPlayers()) do
