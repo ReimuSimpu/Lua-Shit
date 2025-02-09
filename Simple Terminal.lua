@@ -8,10 +8,10 @@ getgenv().HippoSniper = {
             ['Seed Bag'] = { Price = 2500, Terminal = false }
         },
         ['Consumable'] = {
-            ['Tower Luck Booster'] = { Price = 800000, pt = nil, sh = nil, tn = 1, Limit = 1000000, Terminal = true },
+            ['Tower Luck Booster'] = { Price = 1, pt = nil, sh = nil, tn = 1, Limit = 1000000, Terminal = true },
         },
     },
-    ['Url'] = "",
+    ['Url'] = "https://discord.com/api/webhooks/",
 }
 
 repeat task.wait() until game:IsLoaded()
@@ -52,7 +52,7 @@ local GetAssetId = function(Class, Info)
 
     if Info.tn then
         if ItemTable.Icon and type(ItemTable.Icon) == "function" then
-            Icon = getupvalues(ItemTable.Icon)[Info.tn]
+            Icon = unpack(getupvalues(ItemTable.Icon))[Info.tn]
         elseif ItemTable.Tiers and ItemTable.Tiers[1] and ItemTable.Tiers[1].Effect then
             local EffectType = ItemTable.Tiers[1].Effect.Type
             Icon = EffectType and EffectType.Tiers and EffectType.Tiers[Info.tn].Icon
@@ -117,6 +117,8 @@ local ValidItem = function(Class, Cost, Info)
     return 0
 end
 
+
+
 local CheckAllListings = function()
     local BoothFrontend = getsenv(LocalPlayer.PlayerScripts.Scripts.Game["Trading Plaza"]["Booths Frontend"])
     for _, Player in ipairs(game.Players:GetPlayers()) do
@@ -137,7 +139,7 @@ local CheckAllListings = function()
     end
 end
 
-
+--SendWebhook("Enchant", {id = "Chest Mimic", tn = 1}, 1)
 CheckAllListings()
 
 while task.wait() do
