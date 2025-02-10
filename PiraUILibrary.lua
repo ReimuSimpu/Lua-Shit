@@ -28,10 +28,9 @@ ListLayout.Padding = UDim.new(0, 5)
 ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
-local Counter = -1
-Module.CreateText = function(Text, Size)
+Module.CreateText = function(Number, Text, Size)
     local TextLabel = Instance.new("TextLabel", Frame)
-    TextLabel.Name = tostring(Counter + 1)
+    TextLabel.Name = tostring(Number)
     TextLabel.Size = UDim2.new(unpack(Size))
     TextLabel.BackgroundTransparency = 1
     TextLabel.Font = Enum.Font.FredokaOne
@@ -41,9 +40,9 @@ Module.CreateText = function(Text, Size)
     return TextLabel
 end
 
-Module.CreateSpacer = function()
+Module.CreateSpacer = function(Number)
     local Spacer = Instance.new("Frame", Frame)
-    Spacer.Name = tostring(Counter + 1)
+    Spacer.Name = tostring(Number)
     Spacer.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
     Spacer.Size = UDim2.new(0.391, 0, 0, 1)
 end
