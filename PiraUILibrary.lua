@@ -47,3 +47,5 @@ local Module.CreateSpacer = function()
     Spacer.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
     Spacer.Size = UDim2.new(0.391, 0, 0, 1)
 end
+
+return Module
