@@ -1,6 +1,7 @@
 local Module = {}
 
 local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+ScreenGui.Name = "PiraScreenGui"
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
 
