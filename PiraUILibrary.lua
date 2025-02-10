@@ -47,4 +47,13 @@ Module.CreateSpacer = function(Number)
     Spacer.Size = UDim2.new(0.391, 0, 0, 1)
 end
 
+Module.Format = function(int)
+    local index, Suffix = 1, {"", "K", "M", "B", "T"}
+    while int >= 1000 and index < #Suffix do
+        int = int / 1000
+        index = index + 1
+    end
+    return string.format(index == 1 and "%d" or "%.2f%s", int, Suffix[index])
+end
+
 return Module
