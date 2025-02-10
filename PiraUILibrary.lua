@@ -29,7 +29,7 @@ ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 local Counter = -1
-local Module.CreateText = function(Text, Size)
+Module.CreateText = function(Text, Size)
     local TextLabel = Instance.new("TextLabel", Frame)
     TextLabel.Name = tostring(Counter + 1)
     TextLabel.Size = UDim2.new(unpack(Size))
@@ -41,7 +41,7 @@ local Module.CreateText = function(Text, Size)
     return TextLabel
 end
 
-local Module.CreateSpacer = function()
+Module.CreateSpacer = function()
     local Spacer = Instance.new("Frame", Frame)
     Spacer.Name = tostring(Counter + 1)
     Spacer.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
