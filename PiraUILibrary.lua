@@ -38,6 +38,7 @@ local Module.CreateText = function(Text, Size)
     TextLabel.Text = Text
     TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.TextScaled = true
+    return TextLabel
 end
 
 local Module.CreateSpacer = function()
