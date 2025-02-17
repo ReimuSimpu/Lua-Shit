@@ -12,6 +12,7 @@ repeat task.wait() until not LocalPlayer.PlayerGui:FindFirstChild('__INTRO')
 
 local Library = game.ReplicatedStorage.Library
 local Client = Library.Client
+local StoredUIDs = {}
 
 local ExistCmds = require(Client.ExistCountCmds)
 local RapCmds = require(Client.DevRAPCmds)
@@ -82,11 +83,18 @@ local SendWebhook = function(Id, pt, sh)
     end)
 end
 
-Network.Fired('Items: Update'):Connect(function(Player, Inv)
-    if Inv['set'] and Inv['set']['Pet'] then
-        for i,v in pairs(Inv['set']['Pet']) do
-            if string.find(v.id, "Huge") or string.find(v.id, "Titanic") or string.find(v.id, "Gargantuan") then
+for i,v in pairs(Savemod.Get()['Inventory']['Pet'] or {}) do
+    if (string.find(v.id, "Huge") or string.find(v.id, "Titanic") or string.find(v.id, "Gargantuan")) then
+        StoredUIDs[i] = true
+    end
+end
+
+Network.Fired("Items: Update"):Connect(function(_, Inventory)
+    if Inventory["set"] and Inventory["set"]["Pet"] then
+        for uid, v in pairs(Inventory["set"]["Pet"]) do
+            if (string.find(v.id, "Huge") or string.find(v.id, "Titanic") or string.find(v.id, "Gargantuan")) and not StoredUIDs[uid] then
                 SendWebhook(v.id, v.pt, v.sh)
+                StoredUIDs[uid] = true
             end
         end
     end
