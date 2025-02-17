@@ -3,7 +3,6 @@
 
 getgenv().Webhook = {
     ['ID'] = "",
-    ['Id Names'] = { "Huge", "Titanic"},
     ['URL'] = "",
 }
 
@@ -86,7 +85,7 @@ end
 Network.Fired('Items: Update'):Connect(function(Player, Inv)
     if Inv['set'] and Inv['set']['Pet'] then
         for i,v in pairs(Inv['set']['Pet']) do
-            if table.find(Webhook['Id Names'], v.id) then
+            if string.find(v.id, "Huge") or string.find(v.id, "Titanic") or string.find(v.id, "Gargantuan") then
                 SendWebhook(v.id, v.pt, v.sh)
             end
         end
