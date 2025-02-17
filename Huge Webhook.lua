@@ -83,7 +83,7 @@ local SendWebhook = function(Id, pt, sh)
     end)
 end
 
-for i,v in pairs(Savemod.Get()['Inventory']['Pet'] or {}) do
+for i,v in pairs(SaveMod.Get()['Inventory']['Pet'] or {}) do
     if (string.find(v.id, "Huge") or string.find(v.id, "Titanic") or string.find(v.id, "Gargantuan")) then
         StoredUIDs[i] = true
     end
