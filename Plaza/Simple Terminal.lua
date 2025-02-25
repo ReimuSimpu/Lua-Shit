@@ -4,11 +4,15 @@
 getgenv().HippoSniper = {
     ["Items"] = {
         ['Misc'] = {
-            ['Secret Key'] = { Price = 15000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = false },
+            ['Secret Key'] = { Price = 15000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = true },
             ['Seed Bag'] = { Price = 2500, Terminal = false }
         },
-        ['Consumable'] = {
-            ['Tower Luck Booster'] = { Price = 1, pt = nil, sh = nil, tn = 1, Limit = 1000000, Terminal = true },
+    },
+    ['All'] = {
+        ['Pet'] = { 
+            ['Huge'] = { Price = 15000000 },
+            ['Titanic'] = { Price = 15000000 },
+            ['Gargantuan'] = { Price = 15000000 },
         },
     },
     ['Url'] = "https://discord.com/api/webhooks/",
@@ -83,8 +87,15 @@ end
 local SendWebhook = function(Class, ItemData, Gems)
     local AssetID = string.gsub(GetAssetId(DirClassesTable[Class], ItemData), "rbxassetid://", "")
     local Version = ItemData.pt == 1 and "Golden " or ItemData.pt == 2 and "Rainbow " or ""
-    local Title = string.format("||%s|| Sniped a %s%s%s (%sx)", LocalPlayer.Name, Version, ItemData.sh and "Shiny " or "", ItemData.id, ItemData._am or 1)
+    local Title = string.format("%s Sniped a %s%s%s (%sx)", LocalPlayer.Name, Version, ItemData.sh and "Shiny " or "", ItemData.id, ItemData._am or 1)
     local Rap = GetRap(Class, ItemData)
+    local itmamt = 0
+
+    for i,v in pairs(SaveMod.Get().Inventory[Class] or {}) do
+        if string.find(ItemData.id, v.id) then
+            itmamt = v._am or 1
+        end
+    end
 
     local Body = game:GetService("HttpService"):JSONEncode({
         content = "",
@@ -94,7 +105,7 @@ local SendWebhook = function(Class, ItemData, Gems)
             timestamp = DateTime.now():ToIsoDate(),
             thumbnail = { url = string.format("https://biggamesapi.io/image/%s", AssetID) },
             fields = {{
-                name = string.format("<:Booth:1242309582760448020> Price: %s ( %s Each )\n<:Pet:1242299008605749301> RAP: %s ( %s Each )\n<:Diamond:1242298786219556914> Gems Left: %s", FormatInt(Gems * (ItemData._am or 1)), FormatInt(Gems), FormatInt(Rap * (ItemData._am or 1)), FormatInt(Rap), FormatInt(LocalPlayer.leaderstats["💎 Diamonds"].Value)), value = ""
+                name = string.format("<:Booth:1242309582760448020> Price: %s ( %s Each )\n<:Pet:1242299008605749301> RAP: %s ( %s Each )\n<:Diamond:1242298786219556914> Gems Left: %s ( %s Inv Items)", FormatInt(Gems * (ItemData._am or 1)), FormatInt(Gems), FormatInt(Rap * (ItemData._am or 1)), FormatInt(Rap), FormatInt(LocalPlayer.leaderstats["💎 Diamonds"].Value), FormatInt(itmamt)), value = ""
             }},
             footer = { text = "Hippo" }
         }}
@@ -115,11 +126,20 @@ local ValidItem = function(Class, Cost, Info)
     if ConfigItem and Cost <= ConfigItem.Price then
         local _, InvInfo = GetItem(Class, Info.id)
         local AmountToBuy = math.min(Info._am or 1, (ConfigItem.Limit or 0) - (InvInfo and InvInfo._am or 0))
-
+        
         if AmountToBuy > 0 and Info.pt == ConfigItem.pt and Info.sh == ConfigItem.sh and Info.tn == ConfigItem.tn then
             return AmountToBuy
         end
     end
+
+    if HippoSniper['All'][Class] then
+        for i,v in pairs(HippoSniper['All'][Class]) do
+            if string.find(Info.id, i) and Cost <= v.Price then
+                return Info._am or 1
+            end
+        end
+    end
+    
     return 0
 end
 
@@ -143,7 +163,7 @@ local CheckAllListings = function()
     end
 end
 
---SendWebhook("Enchant", {id = "Chest Mimic", tn = 1}, 1)
+--SendWebhook("Misc", {id = "Secret Key" }, 1)
 CheckAllListings()
 
 while task.wait() do
