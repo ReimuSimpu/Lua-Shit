@@ -3,16 +3,19 @@
 
 getgenv().HippoSniper = {
     ["Items"] = {
-        ['Misc'] = {
-            ['Secret Key'] = { Price = 15000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = true },
-            ['Seed Bag'] = { Price = 2500, Terminal = false }
-        },
+        ['Lootbox'] = {
+            ['Fantasy Pack'] = { Price = 1, Terminal = true }
+        }
     },
     ['All'] = {
         ['Pet'] = { 
             ['Huge'] = { Price = 15000000 },
             ['Titanic'] = { Price = 15000000 },
             ['Gargantuan'] = { Price = 15000000 },
+        },
+        ['Card'] = { 
+            ['Huge'] = { Price = 2500000 },
+            ['Titanic'] = { Price = 2500000 },
         },
     },
     ['Url'] = "https://discord.com/api/webhooks/",
@@ -35,7 +38,7 @@ if game.PlaceId == 8737899170 or game.PlaceId == 16498369169 then
     end
 end
 
-local SpecialClassCases, DirClassesTable = {Lootbox = "es", Box = "es", Misc = "MiscItems"}, {}
+local SpecialClassCases, DirClassesTable = {Lootbox = "Lootboxes", Box = "Boxes", Misc = "MiscItems"}, {}
 for Class, _ in pairs(require(Library.Items.Types).Types) do DirClassesTable[Class] = SpecialClassCases[Class] or Class .. "s" end
 
 local FormatInt = function(int)
@@ -123,9 +126,10 @@ end
 
 local ValidItem = function(Class, Cost, Info)
     local ConfigItem = HippoSniper['Items'][Class] and HippoSniper['Items'][Class][Info.id]
+
     if ConfigItem and Cost <= ConfigItem.Price then
         local _, InvInfo = GetItem(Class, Info.id)
-        local AmountToBuy = math.min(Info._am or 1, (ConfigItem.Limit or 0) - (InvInfo and InvInfo._am or 0))
+        local AmountToBuy = math.max(0, math.min(Info._am or 1, (ConfigItem.Limit or math.huge) - (InvInfo and InvInfo._am or 0)))
         
         if AmountToBuy > 0 and Info.pt == ConfigItem.pt and Info.sh == ConfigItem.sh and Info.tn == ConfigItem.tn then
             return AmountToBuy
@@ -154,7 +158,7 @@ local CheckAllListings = function()
                     local AmountToBuy = ValidItem(Class, ListingPrice, ItemData)
 
                     if AmountToBuy > 0 then
-                        local Bought = Network.Invoke("Booths_RequestPurchase", Player.UserId, { [ListingUID] = AmountToBuy })
+                        local Bought, err = Network.Invoke("Booths_RequestPurchase", Player.UserId, { [ListingUID] = AmountToBuy })
                         if Bought then SendWebhook(Class, ItemData, ListingPrice) end
                     end
                 end
