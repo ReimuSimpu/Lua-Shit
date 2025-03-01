@@ -38,7 +38,7 @@ if game.PlaceId == 8737899170 or game.PlaceId == 16498369169 then
     end
 end
 
-local SpecialClassCases, DirClassesTable = {Lootbox = "Lootboxes", Box = "Boxes", Misc = "MiscItems"}, {}
+local SpecialClassCases, DirClassesTable = {Lootbox = "Lootboxes", Box = "Boxes", Misc = "MiscItems", Card = "CardItems" }, {}
 for Class, _ in pairs(require(Library.Items.Types).Types) do DirClassesTable[Class] = SpecialClassCases[Class] or Class .. "s" end
 
 local FormatInt = function(int)
