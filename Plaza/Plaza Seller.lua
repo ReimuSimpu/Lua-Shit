@@ -43,32 +43,7 @@ local ConvertPrice = function(Price, Rap)
     return Price
 end
 
-local ListItems = function()
-    local BoothQueue = {}
-    for Class, Items in pairs(Savemod.Get().Inventory) do
-        local ItemClass = HippoSeller.Items[Class]
-        if ItemClass then
-            for _, v in pairs(Items) do
-                local Item = ItemClass[v.id]
-                if Item and Item.pt == v.pt and Item.sh == v.sh and Item.tn == v.tn then
-                    if v._lk then repeat task.wait(0.1) until Network.Invoke("Locking_SetLocked", _, false) end
-                    table.insert(BoothQueue, {Price = Item.Price, UUID = _, Item = v, Rap = GetRap(Class, v)})
-                end
-            end
-        end
-    end
-    table.sort(BoothQueue, function(a, b) return a.Rap > b.Rap end)
-
-    for _,v in ipairs(BoothQueue) do
-        local MaxAmount = math.min(v.Item._am or 1, 15000, math.floor(25e9 / ConvertPrice(v.Price, v.Rap)))
-        local Success, err = false, ""
-        while not Success and err ~= "You don't have enough of that item!" do
-            Success, err = Network.Invoke("Booths_CreateListing", v.UUID, math.ceil(ConvertPrice(v.Price, v.Rap)), MaxAmount)
-            task.wait(1)
-        end
-    end
-end
-
+-- Claim Booth
 local HaveBooth = false
 while not HaveBooth do 
     local BoothSpawns = game.workspace.TradingPlaza.BoothSpawns:FindFirstChildWhichIsA("Model")
@@ -85,6 +60,39 @@ while not HaveBooth do
     end
 end
 
-while task.wait(5) do
-    ListItems()
+-- Anti AFK
+local VirtualUser = game:GetService("VirtualUser")
+for _, v in pairs(getconnections(LocalPlayer.Idled)) do v:Disable() end
+LocalPlayer.Idled:Connect(function() VirtualUser:ClickButton2(Vector2.new(math.random(0, 1000), math.random(0, 1000))) end)
+
+old = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if not checkcaller() then
+        local Name = tostring(self)
+        if table.find({"Server Closing", "Idle Tracking: Update Timer", "Move Server"}, Name) then
+            return nil
+        end
+    end
+    return old(self, ...)
+end)
+Network.Fire("Idle Tracking: Stop Timer")
+
+-- List Booth
+while task.wait(5) do 
+    local BoothQueue = {}
+    for Class, Items in pairs(Savemod.Get().Inventory) do
+        if HippoSeller.Items[Class] then
+            for _, v in pairs(Items) do
+                if HippoSeller.Items[Class][v.id] then
+                    table.insert(BoothQueue, {Price = HippoSeller.Items[Class][v.id].Price, UUID = _, Item = v, Rap = GetRap(Class, v)})
+                end
+            end
+        end
+    end
+    table.sort(BoothQueue, function(a, b) return a.Rap > b.Rap end)
+    
+    for _, v in ipairs(BoothQueue) do
+        local MaxAmount = math.min(v.Item._am or 1, 15000, math.floor(25e9 / ConvertPrice(v.Price, v.Rap)))
+        repeat until Network.Invoke("Booths_CreateListing", v.UUID, math.ceil(ConvertPrice(v.Price, v.Rap)), MaxAmount)
+    end
 end
