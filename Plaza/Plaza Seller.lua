@@ -1,11 +1,3 @@
-getgenv().HippoSeller = {
-    ["Items"] = {
-        ['Misc'] = {
-            ['Mini Pinata'] = { Price = "100%", pt = nil, sh = nil, tn = nil },
-        },
-    },
-}
-
 repeat task.wait() until game:IsLoaded()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 repeat task.wait() until not LocalPlayer.PlayerGui:FindFirstChild("__INTRO")
