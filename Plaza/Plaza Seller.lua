@@ -84,8 +84,9 @@ while task.wait(5) do
     for Class, Items in pairs(Savemod.Get().Inventory) do
         if HippoSeller.Items[Class] then
             for _, v in pairs(Items) do
-                if HippoSeller.Items[Class][v.id] then
-                    table.insert(BoothQueue, {Price = HippoSeller.Items[Class][v.id].Price, UUID = _, Item = v, Rap = GetRap(Class, v)})
+                local Item = HippoSeller.Items[Class][v.id]
+                if Item and Item.pt == v.pt and Item.sh == v.sh and Item.tn == v.tn then
+                    table.insert(BoothQueue, {Price = Item.Price, UUID = _, Item = v, Rap = GetRap(Class, v)})
                 end
             end
         end
