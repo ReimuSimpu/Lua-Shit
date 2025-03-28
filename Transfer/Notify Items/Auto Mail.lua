@@ -59,9 +59,13 @@ while task.wait(AutoMail['Loop Interval'] or 60) do
             end
         end
 
-        local User = AutoMail['Users'][math.random(1, #AutoMail['Users'])]
-        while not Mailed do
-            Mailed, err = Network.Invoke("Mailbox: Send", User, "Bless", Data.Class, uid, (v._am or 1)) task.wait(0.1)
+        local SendAmount = (v._am or 1)
+
+        if Data.Class == "Currency" then
+            --SendAmount = SendAmount - MailTax
+            -- if u have own tax u can implement
         end
+
+        Network.Invoke("Mailbox: Send", AutoMail['Users'][math.random(1, #AutoMail['Users'])], "Bless", Data.Class, uid, SendAmount) task.wait(1)
     end
 end
