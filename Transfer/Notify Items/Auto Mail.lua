@@ -28,14 +28,12 @@ local Client = game:GetService('ReplicatedStorage').Library.Client
 local Network = require(Client.Network)
 local SaveModule = require(Client.Save)
 
-local PetIds = {"Huge", "Titanic"}
-
 while task.wait(AutoMail['Loop Interval'] or 60) do
     local Queue = {}
   
     for Class, Items in pairs(SaveModule.Get()['Inventory']) do
         for uid, v in pairs(Items) do
-            local PetCheck = (Class == "Pet") and table.find(PetIds, v.id)
+            local PetCheck = (Class == "Pet") and string.find("Huge", v.id)
             local Config = false
 
             for Id, Info in pairs(AutoMail['Items']) do
