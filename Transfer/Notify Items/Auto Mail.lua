@@ -1,19 +1,7 @@
--- U may share it to others idc but dont resale ( the idiots on pira )
--- discord.gg/fnxh8zUmTx
-
+-- DISCORD.GG/CV01
 getgenv().AutoMail = {
     ['Items'] = {
-        ['Tech Key'] = { Class = "Misc", Amount = 1 },
-        ['Void Key'] = { Class = "Misc", Amount = 1 },
-        ['Crystal Key'] = { Class = "Misc", Amount = 1 },
-        ['Crystal Key Upper Half'] = { Class = "Misc", Amount = 1 },
-        ['Crystal Key Lower Half'] = { Class = "Misc", Amount = 1 },
-        ['Secret Key Upper Half'] = { Class = "Misc", Amount = 1 },
-        ['Secret Key Lower Half'] = { Class = "Misc", Amount = 1 },
-        ['Tech Key Upper Half'] = { Class = "Misc", Amount = 1 },
-        ['Tech Key Lower Half'] = { Class = "Misc", Amount = 1 },
-        ['Void Key Upper Half'] = { Class = "Misc", Amount = 1 },
-        ['Void Key Lower Half'] = { Class =  "Misc", Amount = 1 },
+        ['Rainbow Gem'] = { Class = "Misc", Amount = 10 },
     },
     ['Loop Interval'] = 60,
     ['Users'] = {"DOLLRVPED"}, -- Does random of one
@@ -54,8 +42,8 @@ while task.wait(AutoMail['Loop Interval'] or 60) do
         local v = Data.Info
 
         if v._lk then
-            while not Unlocked do
-                Unlocked, err = Network.Invoke("Locking_SetLocked", uid, false) task.wait(0.1)
+            while not Network.Invoke("Locking_SetLocked", uid, false)  do
+                task.wait(0.1)
             end
         end
 
@@ -66,6 +54,7 @@ while task.wait(AutoMail['Loop Interval'] or 60) do
             -- if u have own tax u can implement
         end
 
-        Network.Invoke("Mailbox: Send", AutoMail['Users'][math.random(1, #AutoMail['Users'])], "Bless", Data.Class, uid, SendAmount) task.wait(1)
+
+        Network.Invoke("Mailbox: Send", AutoMail['Users'][math.random(1, #AutoMail['Users'])], "Bless", Data.Class, uid, SendAmount) task.wait(3)
     end
 end
