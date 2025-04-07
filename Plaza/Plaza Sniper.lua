@@ -1,5 +1,5 @@
 -- discord.gg/cvo1
-
+--[[
 getgenv().HippoSniper = {
     ["Items"] = {
         ['Misc'] = {
@@ -16,7 +16,7 @@ getgenv().HippoSniper = {
     },
     ['Url'] = "https://discord.com/api/webhooks/",
 }
-
+]]
 repeat task.wait() until game:IsLoaded()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 repeat task.wait() until not LocalPlayer.PlayerGui:FindFirstChild("__INTRO")
