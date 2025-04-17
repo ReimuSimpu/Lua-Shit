@@ -144,7 +144,7 @@ local ValidItem = function(Class, Cost, Info)
 end
 
 local CheckAllListings = function()
-    local BoothFrontend = getsenv(LocalPlayer.PlayerScripts.Scripts.Game["Trading Plaza"]["Booths Frontend"])
+    local BoothFrontend = getsenv(game.ReplicatedStorage.Library.Client.BoothCmds)
     for _, Player in ipairs(game.Players:GetPlayers()) do
         local BoothInfo = BoothFrontend.getState(Player)
         if BoothInfo and BoothInfo.Listings then
