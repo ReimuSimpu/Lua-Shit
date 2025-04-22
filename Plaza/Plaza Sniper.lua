@@ -143,17 +143,6 @@ local ValidItem = function(Class, Cost, Info)
     
     return 0
 end
-
-local GetPlayerBooth = function(Player)
-    local Id = Player.UserId
-    for i,v in pairs(workspace.__THINGS.Booths:GetChildren()) do
-        if v:GetAttribute("Owner") == Id then
-
-
-        end
-    end
-    
-end
  
 local CheckAllListings = function()
     local BoothFrontend = getsenv(game.ReplicatedStorage.Library.Client.BoothCmds)
