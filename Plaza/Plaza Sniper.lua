@@ -3,20 +3,20 @@
 getgenv().HippoSniper = {
     ["Items"] = {
         ['Misc'] = {
-            ['Secret Key'] = { Price = 15000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = true },
-            ['Seed Bag'] = { Price = 2500, Terminal = false }
+            ['Gift Bag'] = { Price = 3000, pt = nil, sh = nil, tn = nil, Limit = 1000000, Terminal = true },
         },
     },
     ['All'] = {
         ['Pet'] = { 
-            ['Huge'] = { Price = 15000000 },
-            ['Titanic'] = { Price = 15000000 },
-            ['Gargantuan'] = { Price = 15000000 },
+            ['Huge'] = { Price = 0 },
+            ['Titanic'] = { Price = 0 },
+            ['Gargantuan'] = { Price = 0 },
         },
     },
     ['Url'] = "https://discord.com/api/webhooks/",
 }
 ]]
+
 repeat task.wait() until game:IsLoaded()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 repeat task.wait() until not LocalPlayer.PlayerGui:FindFirstChild("__INTRO")
@@ -28,6 +28,7 @@ local Client = Library.Client
 local RAPCmds = require(Client.RAPCmds)
 local Network = require(Client.Network)
 local SaveMod = require(Client.Save)
+local LuaScanner = require(Library.Modules.LuaScanner)
 
 if game.PlaceId == 8737899170 or game.PlaceId == 16498369169 then
     while true do
@@ -143,10 +144,22 @@ local ValidItem = function(Class, Cost, Info)
     return 0
 end
 
+local GetPlayerBooth = function(Player)
+    local Id = Player.UserId
+    for i,v in pairs(workspace.__THINGS.Booths:GetChildren()) do
+        if v:GetAttribute("Owner") == Id then
+
+
+        end
+    end
+    
+end
+ 
 local CheckAllListings = function()
     local BoothFrontend = getsenv(game.ReplicatedStorage.Library.Client.BoothCmds)
     for _, Player in ipairs(game.Players:GetPlayers()) do
         local BoothInfo = BoothFrontend.getState(Player)
+        setclipboard(game.HttpService:JSONEncode(BoothInfo))
         if BoothInfo and BoothInfo.Listings then
             for ListingUID, Listing in pairs(BoothInfo.Listings) do
                 if type(Listing.Item) == "table" then
@@ -154,7 +167,22 @@ local CheckAllListings = function()
                     local AmountToBuy = ValidItem(Class, ListingPrice, ItemData)
 
                     if AmountToBuy > 0 then
-                        local Bought = Network.Invoke("Booths_RequestPurchase", Player.UserId, { [ListingUID] = AmountToBuy })
+                        print(ListingPrice, ItemData.id)
+                        local Bought, Err = Network.Invoke("Booths_RequestPurchase", Player.UserId, { [ListingUID] = AmountToBuy }, {
+                            ["Caller"] = { -- DOING THIS CASUE IDK WHY WHEN I DID Luascanner.Create(-1) didnt work
+                                ["LineNumber"] = 532,
+                                ["ParameterCount"] = 2,
+                                ["Variadic"] = false,
+                                ["Traceback"] = "ReplicatedStorage.Library.Client.BoothCmds:532 function PromptPurchase2\nReplicatedStorage.Library.Client.BoothCmds:659 function promptOtherPlayerBooth2\nReplicatedStorage.Library.Client.BoothCmds:998",
+                                ["ScriptPath"] = "ReplicatedStorage.Library.Client.BoothCmds",
+                                ["ScriptClass"] = "ModuleScript",
+                                ["Handle"] = "function: 0xc3ef3e0bb3f1ea43",
+                                ["FunctionName"] = "PromptPurchase2",
+                                ["ScriptType"] = "Instance",
+                                ["SourceIdentifier"] = "ReplicatedStorage.Library.Client.BoothCmds"
+                            }
+                        })
+                        print(Bought, Err)
                         if Bought then SendWebhook(Class, ItemData, ListingPrice) end
                     end
                 end
@@ -165,6 +193,7 @@ end
 
 --SendWebhook("Misc", {id = "Secret Key" }, 1)
 CheckAllListings()
+
 
 while task.wait() do
     local TerminalItems, Classes = {}, {}
