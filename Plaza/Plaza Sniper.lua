@@ -182,7 +182,6 @@ local CheckAllListings = function()
                                 ["SourceIdentifier"] = "ReplicatedStorage.Library.Client.BoothCmds"
                             }
                         })
-                        print(Bought, Err)
                         if Bought then SendWebhook(Class, ItemData, ListingPrice) end
                     end
                 end
