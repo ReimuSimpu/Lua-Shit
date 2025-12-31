@@ -28,24 +28,34 @@ local ListLayout = Instance.new("UIListLayout", Frame)
 ListLayout.Padding = UDim.new(0, 5)
 ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 Module.CreateText = function(Number, Text, Size)
-    local TextLabel = Instance.new("TextLabel", Frame)
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.Parent = Frame
     TextLabel.Name = tostring(Number)
+    TextLabel.LayoutOrder = Number
+
     TextLabel.Size = UDim2.new(unpack(Size))
     TextLabel.BackgroundTransparency = 1
     TextLabel.Font = Enum.Font.FredokaOne
     TextLabel.Text = Text
     TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.TextScaled = true
+
     return TextLabel
 end
 
 Module.CreateSpacer = function(Number)
-    local Spacer = Instance.new("Frame", Frame)
+    local Spacer = Instance.new("Frame")
+    Spacer.Parent = Frame
     Spacer.Name = tostring(Number)
+    Spacer.LayoutOrder = Number
+
     Spacer.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
     Spacer.Size = UDim2.new(0.391, 0, 0, 1)
+
+    return Spacer
 end
 
 Module.Format = function(int)
