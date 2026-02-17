@@ -1,0 +1,144 @@
+local PiraUI = {}
+PiraUI.__index = PiraUI
+
+function PiraUI.New(Config)
+    local Self = setmetatable({}, PiraUI)
+
+    Config = Config or {}
+    Self.Player = Config.Player or game.Players.LocalPlayer
+    Self.GuiName = Config.Name or "PiraScreenGui"
+    Self.Elements = {}
+
+    Self:_CreateGui()
+
+  self.Parent = config.Parent or game.Players.LocalPlayer.PlayerGui
+
+    if Config.UI then
+        Self:_Build(Config.UI)
+    end
+
+    return Self
+end
+
+function PiraUI:_CreateGui()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = self.GuiName
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+    ScreenGui.Parent = self.Parent
+
+    self.ScreenGui = ScreenGui
+
+    local Background = Instance.new("Frame")
+    Background.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Background.BorderColor3 = Color3.fromRGB(255, 0, 255)
+    Background.Size = UDim2.new(1, 0, 1, 0)
+    Background.BorderMode = Enum.BorderMode.Inset
+    Background.Parent = ScreenGui
+
+    self.Background = Background
+
+    local Logo = Instance.new("ImageLabel")
+    Logo.Position = UDim2.new(0.001, 0, 0.003, 0)
+    Logo.BackgroundTransparency = 1
+    Logo.Image = "rbxassetid://83339153494444"
+    Logo.Size = UDim2.new(0.168, 0, 0.212, 0)
+    Logo.Parent = Background
+
+    local AspectRatio = Instance.new("UIAspectRatioConstraint")
+    AspectRatio.AspectRatio = 1
+    AspectRatio.Parent = Logo
+
+    local Container = Instance.new("Frame")
+    Container.Size = UDim2.new(1, 0, 1, 0)
+    Container.BackgroundTransparency = 1
+    Container.Parent = Background
+
+    self.Container = Container
+
+    local Layout = Instance.new("UIListLayout")
+    Layout.Padding = UDim.new(0, 5)
+    Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    Layout.VerticalAlignment = Enum.VerticalAlignment.Center
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.Parent = Container
+end
+
+function PiraUI:_Build(UITable)
+    local Sorted = {}
+
+    for Name, Data in pairs(UITable) do
+        table.insert(Sorted, {
+            Name = Name,
+            Order = Data[1],
+            Text = Data[2],
+            Size = Data[3]
+        })
+    end
+
+    table.sort(Sorted, function(A, B)
+        return A.Order < B.Order
+    end)
+
+    for Index, Item in ipairs(Sorted) do
+        self:_CreateLabel(Item.Name, Item.Order, Item.Text, Item.Size)
+
+        if Index < #Sorted then
+            self:_CreateSpacer(Item.Order + 1)
+        end
+    end
+end
+
+function PiraUI:_CreateLabel(Name, Order, Text, Size)
+    local Label = Instance.new("TextLabel")
+    Label.Name = Name
+    Label.LayoutOrder = Order
+    Label.Size = UDim2.new(unpack(Size))
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.FredokaOne
+    Label.Text = Text or ""
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextScaled = true
+    Label.Parent = self.Container
+
+    self.Elements[Name] = Label
+end
+
+function PiraUI:_CreateSpacer(Order)
+    local Spacer = Instance.new("Frame")
+    Spacer.LayoutOrder = Order
+    Spacer.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
+    Spacer.Size = UDim2.new(0.391, 0, 0, 1)
+    Spacer.Parent = self.Container
+end
+
+function PiraUI:SetText(Name, Text)
+    local Element = self.Elements[Name]
+    if Element then
+        Element.Text = Text
+    end
+end
+
+function PiraUI:Format(Int)
+    local Index = 1
+    local Suffix = {"", "K", "M", "B", "T"}
+
+    while Int >= 1000 and Index < #Suffix do
+        Int /= 1000
+        Index += 1
+    end
+
+    if Index == 1 then
+        return string.format("%d", Int)
+    end
+
+    return string.format("%.2f%s", Int, Suffix[Index])
+end
+
+function PiraUI:Destroy()
+    if self.ScreenGui then
+        self.ScreenGui:Destroy()
+    end
+end
+
+return PiraUI
