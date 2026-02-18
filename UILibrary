@@ -54,7 +54,7 @@ function FarmUI:_CreateGui(Small)
 	self.Container = Container
 
 	local Layout = Instance.new("UIListLayout")
-	Layout.Padding = UDim.new(0, 5)
+	Layout.Padding = UDim.new(0.005, 0)
 	Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	Layout.VerticalAlignment = Enum.VerticalAlignment.Center
 	Layout.SortOrder = Enum.SortOrder.LayoutOrder
