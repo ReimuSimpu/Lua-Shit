@@ -179,6 +179,16 @@ function FarmUI:Format(Int)
 	return string.format("%.2f%s", Int, Suffix[Index])
 end
 
+function FarmUI:TimeToString = function(t)
+    t = math.floor(t or 0)
+
+    local h = math.floor(t / 3600)
+    local m = math.floor((t % 3600) / 60)
+    local s = t % 60
+
+    return string.format("%02d:%02d:%02d", h, m, s)
+end
+
 function FarmUI:Destroy()
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
