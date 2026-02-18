@@ -179,7 +179,7 @@ function FarmUI:Format(Int)
 	return string.format("%.2f%s", Int, Suffix[Index])
 end
 
-function FarmUI:TimeToString = function(t)
+function FarmUI:TimeToString(t)
     t = math.floor(t or 0)
 
     local h = math.floor(t / 3600)
