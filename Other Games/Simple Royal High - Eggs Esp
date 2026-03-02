@@ -1,11 +1,11 @@
 -- Made by .lordhippo (618580498251382824)
-
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 
 local EggsFolder = workspace:WaitForChild("EggHuntMinigame"):WaitForChild("Eggs")
 local Highlights = {}
 local Billboards = {}
+local Cooldowns = {}
 
 local GetPosition = function(v)
 	return v and (v:IsA("Model") and v:GetPivot().Position or v:IsA("BasePart") and v.Position or v:IsA("Attachment") and v.WorldPosition)
@@ -69,7 +69,18 @@ RunService.RenderStepped:Connect(function()
 		local Position = GetPosition(i)
 		if Position then
 			local Distance = (HumanoidRootPart.Position - Position).Magnitude
+
 			v.Text = "🥚 Egg\n" .. math.floor(Distance) .. " studs"
+            if Distance <= 10 and getgenv().AuraCollect then
+                if not Cooldowns[i] then
+                    Cooldowns[i] = true
+
+                    firetouchinterest(HumanoidRootPart, i, 0)
+                    task.delay(1, function()
+                        Cooldowns[i] = nil
+                    end)
+                end
+		    end
 		end
 	end
 end)
