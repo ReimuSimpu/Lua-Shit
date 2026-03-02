@@ -1,0 +1,74 @@
+# Made by .lordhippo (618580498251382824)
+local RunService = game:GetService("RunService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+local EggsFolder = workspace:WaitForChild("EggHuntMinigame"):WaitForChild("Eggs")
+local Highlights = {}
+local Billboards = {}
+
+local GetPosition = function(v)
+	return v and (v:IsA("Model") and v:GetPivot().Position or v:IsA("BasePart") and v.Position or v:IsA("Attachment") and v.WorldPosition)
+end
+
+local CreateVisual = function(v)
+	if Highlights[v] then return end
+
+	local Highlight = Instance.new("Highlight")
+	Highlight.FillColor = Color3.fromRGB(255, 255, 0)
+	Highlight.OutlineColor = Color3.fromRGB(255, 170, 0)
+	Highlight.FillTransparency = 0.5
+	Highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	Highlight.Parent = v
+	
+	local BillboardGui = Instance.new("BillboardGui")
+	BillboardGui.Size = UDim2.new(0, 120, 0, 40)
+	BillboardGui.StudsOffset = Vector3.new(0, 3, 0)
+	BillboardGui.AlwaysOnTop = true
+	BillboardGui.Parent = v
+	
+	local TextLabel = Instance.new("TextLabel")
+	TextLabel.Size = UDim2.new(1, 0, 1, 0)
+	TextLabel.BackgroundTransparency = 1
+	TextLabel.TextScaled = true
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+	TextLabel.TextStrokeTransparency = 0
+	TextLabel.Font = Enum.Font.GothamBold
+	TextLabel.Parent = BillboardGui
+	
+	Highlights[v] = Highlight
+	billboards[v] = TextLabel
+end
+
+local RemoveVisual = function(v)
+	if Highlights[v] then
+		Highlights[v]:Destroy()
+		Highlights[v] = nil
+	end
+	if billboards[v] then
+		billboards[v].Parent:Destroy()
+		billboards[v] = nil
+	end
+end
+
+EggsFolder.ChildAdded:Connect(CreateVisual)
+EggsFolder.ChildRemoved:Connect(RemoveVisual)
+
+for _, v in ipairs(EggsFolder:GetChildren()) do
+	CreateVisual(v)
+end
+
+RunService.RenderStepped:Connect(function()
+	if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		return
+	end
+	
+	local HumanoidRootPart = LocalPlayer.Character.HumanoidRootPart
+	
+	for i,v in pairs(billboards) do
+		local Position = getPosition(i)
+		if Position then
+			local Distance = (HumanoidRootPart.Position - Position).Magnitude
+			v.Text = "🥚 Egg\n" .. math.floor(Distance) .. " studs"
+		end
+	end
+end)
