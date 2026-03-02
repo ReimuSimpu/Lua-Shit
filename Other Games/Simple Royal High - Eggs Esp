@@ -1,6 +1,7 @@
-# Made by .lordhippo (618580498251382824)
+-- Made by .lordhippo (618580498251382824)
+
 local RunService = game:GetService("RunService")
-local LocalPlayer = game:GetService("Players").LocalPlayer
+local LocalPlayer = game:GetService("Players")
 
 local EggsFolder = workspace:WaitForChild("EggHuntMinigame"):WaitForChild("Eggs")
 local Highlights = {}
@@ -36,7 +37,7 @@ local CreateVisual = function(v)
 	TextLabel.Parent = BillboardGui
 	
 	Highlights[v] = Highlight
-	billboards[v] = TextLabel
+	Billboards[v] = TextLabel
 end
 
 local RemoveVisual = function(v)
@@ -44,9 +45,9 @@ local RemoveVisual = function(v)
 		Highlights[v]:Destroy()
 		Highlights[v] = nil
 	end
-	if billboards[v] then
-		billboards[v].Parent:Destroy()
-		billboards[v] = nil
+	if Billboards[v] then
+		Billboards[v].Parent:Destroy()
+		Billboards[v] = nil
 	end
 end
 
@@ -64,8 +65,8 @@ RunService.RenderStepped:Connect(function()
 	
 	local HumanoidRootPart = LocalPlayer.Character.HumanoidRootPart
 	
-	for i,v in pairs(billboards) do
-		local Position = getPosition(i)
+	for i,v in pairs(Billboards) do
+		local Position = GetPosition(i)
 		if Position then
 			local Distance = (HumanoidRootPart.Position - Position).Magnitude
 			v.Text = "🥚 Egg\n" .. math.floor(Distance) .. " studs"
