@@ -71,7 +71,7 @@ RunService.RenderStepped:Connect(function()
 			local Distance = (HumanoidRootPart.Position - Position).Magnitude
 
 			v.Text = "🥚 Egg\n" .. math.floor(Distance) .. " studs"
-            if Distance <= 10 and getgenv().AuraCollect then
+            if Distance <= 20 and getgenv().AuraCollect then
                 if not Cooldowns[i] then
                     Cooldowns[i] = true
 
