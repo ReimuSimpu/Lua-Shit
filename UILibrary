@@ -26,6 +26,7 @@ function FarmUI:_CreateGui(Small)
 	ScreenGui.IgnoreGuiInset = true
 	ScreenGui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
 	ScreenGui.Parent = self.Parent
+	ScreenGui.ResetOnSpawn = false
 	self.ScreenGui = ScreenGui
 
 	local Background = Instance.new("Frame")
