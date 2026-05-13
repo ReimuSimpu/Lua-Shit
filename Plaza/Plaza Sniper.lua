@@ -1,5 +1,7 @@
--- discord.gg/cvo1
---[[
+
+
+
+
 getgenv().HippoSniper = {
     ["Items"] = {
         ['Misc'] = {
@@ -15,7 +17,7 @@ getgenv().HippoSniper = {
     },
     ['Url'] = "https://discord.com/api/webhooks/",
 }
-]]
+
 
 repeat task.wait() until game:IsLoaded()
 local LocalPlayer = game:GetService("Players").LocalPlayer
@@ -146,6 +148,11 @@ end
  
 local CheckAllListings = function()
     local BoothFrontend = getsenv(game.ReplicatedStorage.Library.Client.BoothCmds)
+
+    if not BoothFrontend.getState then
+        return
+    end
+
     for _, Player in ipairs(game.Players:GetPlayers()) do
         local BoothInfo = BoothFrontend.getState(Player)
         setclipboard(game.HttpService:JSONEncode(BoothInfo))
