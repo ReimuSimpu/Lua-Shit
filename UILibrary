@@ -7,7 +7,7 @@ function FarmUI.new(Config)
 	Config = Config or {}
 	Self.Player = Config.Player or game.Players.LocalPlayer
 	Self.GuiName = Config.Name or "PiraScreenGui"
-	Self.Logo = Config.Logo or "rbxassetid://70672102815874"
+	Self.Logo = Config.Logo or "rbxassetid://119275169229649"
 	Self.Elements = {}
 
 	Self.Parent = Config.Parent or Self.Player:WaitForChild("PlayerGui")
