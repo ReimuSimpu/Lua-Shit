@@ -2,24 +2,23 @@ local FarmUI = {}
 FarmUI.__index = FarmUI
 
 local SUFFIX = {"", "K", "M", "B", "T"}
+local SUFFIX_LEN = #SUFFIX
 local UserInputService = game:GetService("UserInputService")
+local MB1 = Enum.UserInputType.MouseButton1
+local MOUSE_MOVE = Enum.UserInputType.MouseMovement
 
 function FarmUI.new(Config)
 	local Self = setmetatable({}, FarmUI)
-	
 	Config = Config or {}
 	Self.Player = Config.Player or game.Players.LocalPlayer
 	Self.GuiName = Config.Name or "PiraScreenGui"
 	Self.Logo = Config.Logo or "rbxassetid://119275169229649"
 	Self.Elements = {}
 	Self.Parent = Config.Parent or Self.Player:WaitForChild("PlayerGui")
-	
 	Self:_CreateGui(Config.Small)
-	
 	if Config.UI then
 		Self:_Build(Config.UI)
 	end
-	
 	return Self
 end
 
@@ -41,15 +40,19 @@ function FarmUI:_CreateGui(Small)
 	self.Background = Background
 
 	local Logo = Instance.new("ImageLabel")
-	Logo.Position = UDim2.new(0.001, 0, 0.003, 0)
+	Logo.Position = UDim2.new(0.015, 0, 0.02, 0)
+	Logo.Size = UDim2.new(0.25, 0, 0.25, 0)
 	Logo.BackgroundTransparency = 1
 	Logo.Image = self.Logo
-	Logo.Size = UDim2.new(0.168, 0, 0.212, 0)
 	Logo.Parent = Background
 
-	local AspectRatio = Instance.new("UIAspectRatioConstraint")
-	AspectRatio.AspectRatio = 1
-	AspectRatio.Parent = Logo
+	local LogoCorner = Instance.new("UICorner")
+	LogoCorner.CornerRadius = UDim.new(1, 0)
+	LogoCorner.Parent = Logo
+
+	local LogoAspect = Instance.new("UIAspectRatioConstraint")
+	LogoAspect.AspectRatio = 1
+	LogoAspect.Parent = Logo
 
 	local Container = Instance.new("Frame")
 	Container.Size = UDim2.new(1, 0, 1, 0)
@@ -73,44 +76,28 @@ function FarmUI:_CreateGui(Small)
 		Background.Position = UDim2.new(0.5, 0, 0.5, 0)
 		Background.AnchorPoint = Vector2.new(0.5, 0.5)
 
-		local dragging, dragInput, dragStart, startPos, changed
-		
-		local function update(input)
-			local delta = input.Position - dragStart
-			Background.Position = UDim2.new(
-				startPos.X.Scale, startPos.X.Offset + delta.X,
-				startPos.Y.Scale, startPos.Y.Offset + delta.Y
-			)
-		end
-		
-		local mouseButton1 = Enum.UserInputType.MouseButton1
-		local mouseMovement = Enum.UserInputType.MouseMovement
-		local inputStateEnd = Enum.UserInputState.End
-		
+		local dragStart, startPos, moveConn
+
 		Background.InputBegan:Connect(function(input)
-			if input.UserInputType == mouseButton1 then
-				dragging = true
+			if input.UserInputType == MB1 then
 				dragStart = input.Position
 				startPos = Background.Position
-				
-				if changed then changed:Disconnect() end
-				changed = input.Changed:Connect(function()
-					if input.UserInputState == inputStateEnd then
-						dragging = false
+				moveConn = UserInputService.InputChanged:Connect(function(moved)
+					if moved.UserInputType == MOUSE_MOVE then
+						local delta = moved.Position - dragStart
+						Background.Position = UDim2.new(
+							startPos.X.Scale, startPos.X.Offset + delta.X,
+							startPos.Y.Scale, startPos.Y.Offset + delta.Y
+						)
 					end
 				end)
 			end
 		end)
 
-		Background.InputChanged:Connect(function(input)
-			if input.UserInputType == mouseMovement then
-				dragInput = input
-			end
-		end)
-
-		UserInputService.InputChanged:Connect(function(input)
-			if input == dragInput and dragging then
-				update(input)
+		UserInputService.InputEnded:Connect(function(input)
+			if input.UserInputType == MB1 and moveConn then
+				moveConn:Disconnect()
+				moveConn = nil
 			end
 		end)
 	end
@@ -119,18 +106,9 @@ end
 function FarmUI:_Build(UITable)
 	local Sorted = {}
 	for Name, Data in pairs(UITable) do
-		Sorted[#Sorted + 1] = {
-			Name = Name,
-			Order = Data[1],
-			Text = Data[2],
-			Size = Data[3]
-		}
+		Sorted[#Sorted + 1] = {Name = Name, Order = Data[1], Text = Data[2], Size = Data[3]}
 	end
-
-	table.sort(Sorted, function(A, B)
-		return A.Order < B.Order
-	end)
-
+	table.sort(Sorted, function(A, B) return A.Order < B.Order end)
 	for Index, Item in ipairs(Sorted) do
 		self:_CreateLabel(Item.Name, Item.Order, Item.Text, Item.Size)
 		if Index < #Sorted then
@@ -150,7 +128,6 @@ function FarmUI:_CreateLabel(Name, Order, Text, Size)
 	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	Label.TextScaled = true
 	Label.Parent = self.Container
-
 	self.Elements[Name] = Label
 end
 
@@ -170,19 +147,12 @@ function FarmUI:SetText(Name, Text)
 end
 
 function FarmUI:Format(Int)
-	local index = 1
-	local value = Int
-	
-	while value >= 1000 and index < #SUFFIX do
+	local index, value = 1, Int
+	while value >= 1000 and index < SUFFIX_LEN do
 		value = value / 1000
 		index = index + 1
 	end
-	
-	if index == 1 then
-		return string.format("%d", value)
-	end
-	
-	return string.format("%.2f%s", value, SUFFIX[index])
+	return index == 1 and string.format("%d", value) or string.format("%.2f%s", value, SUFFIX[index])
 end
 
 function FarmUI:TimeToString(t)
